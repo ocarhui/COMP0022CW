@@ -118,9 +118,9 @@ CREATE TABLE `movie_database`.`movie_tags` (
     `rating-userID` INT NOT NULL,
     `tagID` INT NOT NULL,
     `timestamp` TIMESTAMP NOT NULL,
-    PRIMARY KEY (`movieID`, `userID`, `tagID`),
+    PRIMARY KEY (`movieID`, `rating-userID`, `tagID`),
     FOREIGN KEY (`movieID`) REFERENCES `movies`(`movieID`),
-    FOREIGN KEY (`rating-userID`) REFERENCES `rating-users`(`ratomg-userID`),
+    FOREIGN KEY (`rating-userID`) REFERENCES `rating-users`(`rating-userID`),
     FOREIGN KEY (`tagID`) REFERENCES `tags`(`tagID`)
  ) ENGINE = InnoDB;
 
