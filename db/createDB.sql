@@ -24,11 +24,11 @@ CREATE TABLE `movie_database`.`movies` (
     FOREIGN KEY (`production_country_id`) REFERENCES `production_countries`(`countryID`)
 ) ENGINE = InnoDB;
 
-CREATE TABLE `movie_database`.`countries` {
-    `production_country_id` CHAR NOT NULL,
-    `country_name` VARCHAR(50) NOT NULL,
-    PRIMARY KEY (`production_country_id`)
-} ENGINE = InnoDB;
+CREATE TABLE `movie_database`.`production_countries` ( 
+    `countryID` VARCHAR(2) NOT NULL , 
+    `countryName` VARCHAR(50) NOT NULL , 
+    PRIMARY KEY (`countryID`)
+) ENGINE = InnoDB;
 
 CREATE TABLE `movie_database`.`movie_countries` {
     `movieID` INT NOT NULL,
