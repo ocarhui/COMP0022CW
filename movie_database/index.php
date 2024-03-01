@@ -1,7 +1,9 @@
 <?php 
+session_start();
+
+require 'setup_database.php';
 require 'database.php'; 
 
-session_start();
 
 // Fetch distinct countries from the database
 ?>
