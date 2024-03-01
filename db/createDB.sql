@@ -19,11 +19,24 @@ CREATE TABLE `movie_database`.`movies` (
     `budget` INT,
     `tmdb_popularity` FLOAT(6,3),
     `imdb_rating` FLOAT(3,1),
-    `imdb_rating_votes` INT,
-    `production_country_id` VARCHAR(2),
+    `imdb_rating_votes` INT
     PRIMARY KEY (`movieID`),
     FOREIGN KEY (`production_country_id`) REFERENCES `production_countries`(`countryID`)
 ) ENGINE = InnoDB;
+
+CREATE TABLE `movie_database`.`countries` {
+    `production_country_id` CHAR NOT NULL,
+    `country_name` VARCHAR(50) NOT NULL,
+    PRIMARY KEY (`production_country_id`)
+} ENGINE = InnoDB;
+
+CREATE TABLE `movie_database`.`movie_countries` {
+    `movieID` INT NOT NULL,
+    `production_country_id` CHAR NOT NULL,
+    PRIMARY KEY (`movieID`, `production_country_id`),
+    FOREIGN KEY (`movieID`) REFERENCES `movies`(`movieID`),
+    FOREIGN KEY (`production_country_id`) REFERENCES `countries`(`production_country_id`)
+} ENGINE = InnoDB;
 
 CREATE TABLE `movie_database`.`genre` ( 
     `genreID` VARCHAR NOT NULL, 
@@ -115,14 +128,6 @@ CREATE TABLE `movie_database`.`movie_tags` {
     FOREIGN KEY (`userID`) REFERENCES `rating-users`(`id`),
     FOREIGN KEY (`tagID`) REFERENCES `tags`(`tagID`)
 } ENGINE = InnoDB;
-
-INSERT INTO `movie_database`.`movie_db` (`name`, `year`, `country`) VALUES ('movie1', '2018', 'CN');
-INSERT INTO `movie_database`.`movie_db` (`name`, `year`, `country`) VALUES ('movie2', '2021', 'UK');
-INSERT INTO `movie_database`.`movie_db` (`name`, `year`, `country`) VALUES ('movie3', '2021', 'US');
-INSERT INTO `movie_database`.`movie_db` (`name`, `year`, `country`) VALUES ('movie4', '2024', 'CN');
-INSERT INTO `movie_database`.`movie_db` (`name`, `year`, `country`) VALUES ('movie5', '2025', 'CN');
-INSERT INTO `movie_database`.`movie_db` (`name`, `year`, `country`) VALUES ('movie6', '2025', 'CN');
-INSERT INTO `movie_database`.`movie_db` (`name`, `year`, `country`) VALUES ('movie7', '2026', 'CN');
 
 INSERT INTO `movie_database`.`users` (`username`, `email`, `password`) VALUES ('a', '1463855272@qq.com', '$2y$10$z7nXkEABKtjHbjvFG3TDo.qj7M9jw0CzWRuHC8xyvztg1FbYnblXC');
 
