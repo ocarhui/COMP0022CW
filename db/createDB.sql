@@ -92,7 +92,7 @@ CREATE TABLE `movie_database`.`movie_crew` (
 
 CREATE TABLE `movie_database`.`rating-users` (
     `rating-userID` INT NOT NULL,
-    PRIMARY KEY (`userID`)
+    PRIMARY KEY (`rating-userID`)
  ) ENGINE = InnoDB;
 
 CREATE TABLE `movie_database`.`ratings` (
@@ -103,7 +103,7 @@ CREATE TABLE `movie_database`.`ratings` (
     `timestamp` TIMESTAMP NOT NULL,
     PRIMARY KEY (`ratingID`),
     FOREIGN KEY (`movieID`) REFERENCES `movies`(`movieID`),
-    FOREIGN KEY (`userID`) REFERENCES `rating-users`(`id`)
+    FOREIGN KEY (`rating-userID`) REFERENCES `rating-users`(`rating-userID`)
 ) ENGINE = InnoDB;
 
 CREATE TABLE `movie_database`.`tags` (
@@ -115,12 +115,12 @@ CREATE TABLE `movie_database`.`tags` (
 
 CREATE TABLE `movie_database`.`movie_tags` (
     `movieID` INT NOT NULL,
-    `userID` INT NOT NULL,
+    `rating-userID` INT NOT NULL,
     `tagID` INT NOT NULL,
     `timestamp` TIMESTAMP NOT NULL,
     PRIMARY KEY (`movieID`, `userID`, `tagID`),
     FOREIGN KEY (`movieID`) REFERENCES `movies`(`movieID`),
-    FOREIGN KEY (`userID`) REFERENCES `rating-users`(`id`),
+    FOREIGN KEY (`rating-userID`) REFERENCES `rating-users`(`ratomg-userID`),
     FOREIGN KEY (`tagID`) REFERENCES `tags`(`tagID`)
  ) ENGINE = InnoDB;
 
