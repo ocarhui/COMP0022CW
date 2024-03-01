@@ -1,0 +1,21 @@
+genre,genreID
+Animation,1
+Fantasy,2
+Children,3
+Documentary,4
+Mystery,5
+IMAX,6
+Western,7
+Horror,8
+Comedy,9
+Adventure,10
+Thriller,11
+Film-Noir,12
+Action,13
+Drama,14
+Romance,15
+(no genres listed),16
+Musical,17
+War,18
+Crime,19
+Sci-Fi,20

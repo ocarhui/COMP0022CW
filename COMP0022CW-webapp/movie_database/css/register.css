@@ -1,0 +1,35 @@
+body {
+    font-size: 18px;
+    text-align: center;
+    margin-top: 60px; /* Adjusted margin to make space for the fixed navigation bar */
+}
+
+.register .error {
+    color: red;
+    font-size: 16px;
+}
+
+.register form {
+    display: inline-block;
+    text-align: left;
+}
+
+.register label {
+    display: block;
+    margin-bottom: 10px;
+}
+
+.register input[type="text"],
+.register input[type="password"],
+.register input[type="email"],
+.register input[type="date"] {
+    width: 200px;
+    padding: 5px;
+    margin-bottom: 10px;
+    font-size: 16px;
+}
+
+.register input[type="submit"] {
+    padding: 10px 20px;
+    font-size: 18px;
+}
