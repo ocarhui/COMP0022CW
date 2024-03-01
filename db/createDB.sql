@@ -32,7 +32,7 @@ CREATE TABLE `movie_database`.`production_countries` (
 
 CREATE TABLE `movie_database`.`movie_countries` (
     `movieID` INT NOT NULL,
-    `countryID` CHAR NOT NULL,
+    `countryID` VARCHAR(2) NOT NULL,
     PRIMARY KEY (`movieID`, `countryID`),
     FOREIGN KEY (`movieID`) REFERENCES `movies`(`movieID`),
     FOREIGN KEY (`countryID`) REFERENCES `production_countries`(`countryID`)
@@ -47,7 +47,7 @@ CREATE TABLE `movie_database`.`movie_countries` (
 CREATE TABLE `movie_database`.`movie_genre` ( 
     `movieID` INT NOT NULL , 
     `genreID` INT NOT NULL , 
-    PRIMARY KEY (`movieID`, `genreID`)
+    PRIMARY KEY (`movieID`, `genreID`),
     FOREIGN KEY (`movieID`) REFERENCES `movies`(`movieID`),
     FOREIGN KEY (`genreID`) REFERENCES `genre`(`genreID`)
 ) ENGINE = InnoDB;
@@ -61,7 +61,7 @@ CREATE TABLE `movie_database`.`production_companies` (
 CREATE TABLE `movie_database`.`movie_production_companies` ( 
     `movieID` INT NOT NULL , 
     `companyID` INT NOT NULL , 
-    PRIMARY KEY (`movieID`, `companyID`)
+    PRIMARY KEY (`movieID`, `companyID`),
     FOREIGN KEY (`movieID`) REFERENCES `movies`(`movieID`),
     FOREIGN KEY (`companyID`) REFERENCES `production_companies`(`companyID`)
 ) ENGINE = InnoDB;
