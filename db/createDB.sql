@@ -66,12 +66,6 @@ CREATE TABLE `movie_database`.`movie_production_companies` (
     FOREIGN KEY (`companyID`) REFERENCES `production_companies`(`companyID`)
 ) ENGINE = InnoDB;
 
-CREATE TABLE `movie_database`.`production_countries` ( 
-    `countryID` VARCHAR(2) NOT NULL , 
-    `countryName` VARCHAR(50) NOT NULL , 
-    PRIMARY KEY (`countryID`)
-) ENGINE = InnoDB;
-
 CREATE TABLE `movie_database`.`crew` {
     `crewID` INT NOT NULL,
     `name` VARCHAR(255) NOT NULL,
