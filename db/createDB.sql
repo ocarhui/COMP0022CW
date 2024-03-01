@@ -91,7 +91,7 @@ CREATE TABLE `movie_database`.`movie_crew` (
 ) ENGINE = InnoDB;
 
 CREATE TABLE `movie_database`.`rating-users` (
-    `rating-userID` INT NOT NULL
+    `rating-userID` INT NOT NULL,
     PRIMARY KEY (`userID`)
  ) ENGINE = InnoDB;
 
