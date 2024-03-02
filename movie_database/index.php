@@ -1,13 +1,11 @@
 <?php 
-require 'database.php'; 
-
 session_start();
 
+require 'setup_database.php';
+require 'database.php'; 
+
+
 // Fetch distinct countries from the database
-$query_countries = "SELECT DISTINCT country FROM movie_db";
-$stmt_countries = mysqli_prepare($connection, $query_countries);
-mysqli_stmt_execute($stmt_countries);
-$response_countries = mysqli_stmt_get_result($stmt_countries);
 ?>
 
 <!doctype html>
@@ -96,18 +94,6 @@ $response_countries = mysqli_stmt_get_result($stmt_countries);
     <div id="filters">
         <!-- Filter -->
         <div id="selection">
-            <!-- Select country -->
-            <form method='POST' action='index.php'>
-                <div id="country" class="dropdown-check-list" tabindex="100">
-                    <span class="anchor">Country</span>
-                    <ul class="items">
-                        <?php while($row = mysqli_fetch_assoc($response_countries)) : ?>
-                            <input type="checkbox" name="selected_countries[]" value='<?php echo $row['country']; ?>' /><?php echo $row['country']; ?>
-                        <?php endwhile; ?>
-                    </ul>
-                </div>
-                <input type='submit' name='submit' value='Submit' style="width: 200px;">
-            </form>
             <!-- Result -->
             <?php include 'filter_result.php'; ?>
         </div>

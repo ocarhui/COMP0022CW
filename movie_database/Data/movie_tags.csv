@@ -1,4 +1,4 @@
-movieId,rating-userId,tagID,timestamp
+movieID,rating_userID,tagID,timestamp
 60756,2,1,1445714994
 60756,2,2,1445714996
 60756,2,3,1445714992
