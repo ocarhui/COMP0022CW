@@ -34,7 +34,7 @@ CREATE TABLE `movie_database`.`movie_countries` (
     `movieID` INT NOT NULL,
     `countryID` VARCHAR(2) NOT NULL,
     PRIMARY KEY (`movieID`, `countryID`),
-    FOREIGN KEY (`movieID`) REFERENCES `movies`(`movieID`),
+    -- FOREIGN KEY (`movieID`) REFERENCES `movies`(`movieID`),
     FOREIGN KEY (`countryID`) REFERENCES `production_countries`(`countryID`)
  ) ENGINE = InnoDB;
 
@@ -48,7 +48,7 @@ CREATE TABLE `movie_database`.`movie_genre` (
     `movieID` INT NOT NULL , 
     `genreID` INT NOT NULL , 
     PRIMARY KEY (`movieID`, `genreID`),
-    FOREIGN KEY (`movieID`) REFERENCES `movies`(`movieID`),
+    -- FOREIGN KEY (`movieID`) REFERENCES `movies`(`movieID`),
     FOREIGN KEY (`genreID`) REFERENCES `genre`(`genreID`)
 ) ENGINE = InnoDB;
 
@@ -62,12 +62,12 @@ CREATE TABLE `movie_database`.`movie_production_companies` (
     `movieID` INT NOT NULL , 
     `companyID` INT NOT NULL , 
     PRIMARY KEY (`movieID`, `companyID`),
-    FOREIGN KEY (`movieID`) REFERENCES `movies`(`movieID`),
+    -- FOREIGN KEY (`movieID`) REFERENCES `movies`(`movieID`),
     FOREIGN KEY (`companyID`) REFERENCES `production_companies`(`companyID`)
 ) ENGINE = InnoDB;
 
 CREATE TABLE `movie_database`.`crew` (
-    `crewID` INT NOT NULL,
+    `crewID` VARCHAR(9) NOT NULL,
     `name` VARCHAR(255) NOT NULL,
     `birth_year` YEAR,
     `end_year` YEAR,
@@ -82,28 +82,29 @@ CREATE TABLE `movie_database`.`crew_occupation` (
 
 CREATE TABLE `movie_database`.`movie_crew` (
     `movieID` INT NOT NULL,
-    `crewID` INT NOT NULL,
+    `crewID` VARCHAR(9) NOT NULL,
     `occupationID` INT NOT NULL,
+    `characters` VARCHAR(255),
     PRIMARY KEY (`movieID`, `crewID`, `occupationID`),
-    FOREIGN KEY (`movieID`) REFERENCES `movies`(`movieID`),
+    -- FOREIGN KEY (`movieID`) REFERENCES `movies`(`movieID`),
     FOREIGN KEY (`crewID`) REFERENCES `crew`(`crewID`),
     FOREIGN KEY (`occupationID`) REFERENCES `crew_occupation`(`occupationID`)
 ) ENGINE = InnoDB;
 
-CREATE TABLE `movie_database`.`rating-users` (
-    `rating-userID` INT NOT NULL,
-    PRIMARY KEY (`rating-userID`)
+CREATE TABLE `movie_database`.`rating_users` (
+    `rating_userID` INT NOT NULL,
+    PRIMARY KEY (`rating_userID`)
  ) ENGINE = InnoDB;
 
 CREATE TABLE `movie_database`.`ratings` (
     `ratingID` INT NOT NULL,
     `movieID` INT NOT NULL,
-    `rating-userID` INT NOT NULL,
+    `rating_userID` INT NOT NULL,
     `rating` INT NOT NULL,
-    `timestamp` TIMESTAMP NOT NULL,
+    `timestamp` INT NOT NULL,
     PRIMARY KEY (`ratingID`),
-    FOREIGN KEY (`movieID`) REFERENCES `movies`(`movieID`),
-    FOREIGN KEY (`rating-userID`) REFERENCES `rating-users`(`rating-userID`)
+    -- FOREIGN KEY (`movieID`) REFERENCES `movies`(`movieID`),
+    FOREIGN KEY (`rating_userID`) REFERENCES `rating_users`(`rating_userID`)
 ) ENGINE = InnoDB;
 
 CREATE TABLE `movie_database`.`tags` (
@@ -112,15 +113,14 @@ CREATE TABLE `movie_database`.`tags` (
     PRIMARY KEY (`tagID`)
 ) ENGINE = InnoDB;
 
-
 CREATE TABLE `movie_database`.`movie_tags` (
     `movieID` INT NOT NULL,
-    `rating-userID` INT NOT NULL,
-    `tagID` INT NOT NULL,
-    `timestamp` TIMESTAMP NOT NULL,
-    PRIMARY KEY (`movieID`, `rating-userID`, `tagID`),
-    FOREIGN KEY (`movieID`) REFERENCES `movies`(`movieID`),
-    FOREIGN KEY (`rating-userID`) REFERENCES `rating-users`(`rating-userID`),
+    `rating_userID` INT NOT NULL,
+    `tagID` INT,
+    `timestamp` INT NOT NULL,
+    PRIMARY KEY (`movieID`, `rating_userID`, `tagID`),
+    -- FOREIGN KEY (`movieID`) REFERENCES `movies`(`movieID`),
+    FOREIGN KEY (`rating_userID`) REFERENCES `rating_users`(`rating_userID`),
     FOREIGN KEY (`tagID`) REFERENCES `tags`(`tagID`)
  ) ENGINE = InnoDB;
 

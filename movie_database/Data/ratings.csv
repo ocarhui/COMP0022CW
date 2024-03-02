@@ -1,4 +1,4 @@
-ratingID,movieId,rating-userId,rating,timestamp
+ratingID,movieID,rating_userID,rating,timestamp
 1,1,1,4.0,964982703
 2,3,1,4.0,964981247
 3,6,1,4.0,964982224
