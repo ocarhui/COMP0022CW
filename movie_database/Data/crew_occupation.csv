@@ -1,41 +1,14 @@
 occupationID,occupationName
-0,location management
-1,editor
-2,actor
-3,camera department
-4,transportation department
-5,producer
-6,production designer
-7,production department
-8,composer
-9,script department
-10,casting department
-11,set decorator
-12,music department
-13,animation department
-14,stunts
-15,talent agent
-16,make-up department
-17,visual effects
-18,art department
-19,special effects
-20,soundtrack
-21,miscellaneous
-22,cinematographer
-23,music artist
-24,assistant director
-25,writer
-26,podcaster
-27,sound department
-28,editorial department
-29,art director
-30,casting director
-31,legal
-32,costume designer
-33,executive
-34,production manager
-35,actress
-36,director
-37,costume department
-38,manager
-39,assistant
+0,writer
+1,actor
+2,director
+3,producer
+4,actress
+5,cinematographer
+6,composer
+7,editor
+8,production_designer
+9,archive_footage
+10,self
+11, N/A
+12,archive_sound
