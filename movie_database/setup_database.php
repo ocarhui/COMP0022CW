@@ -27,7 +27,7 @@
                         FIELDS TERMINATED BY '|'
                         LINES TERMINATED BY '\n'
                         IGNORE 1 LINES
-                        (movieID, title, original_language, runtime, overview, poster_URL, box_office, budget, tmdb_popularity, imdb_rating, imdb_rating_votes)
+                        (movieID, title, release_year, original_language, runtime, overview, poster_URL, box_office, budget, tmdb_popularity, imdb_rating, imdb_rating_votes)
                         SET original_language = NULLIF(original_language, ''), 
                         runtime = NULLIF(runtime, ''), 
                         overview = NULLIF(overview, ''), 

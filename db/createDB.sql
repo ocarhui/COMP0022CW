@@ -11,6 +11,7 @@ CREATE TABLE `movie_database`.`users` (
 CREATE TABLE `movie_database`.`movies` ( 
     `movieID` INT NOT NULL,
     `title` VARCHAR(255) NOT NULL,
+    `release_year` YEAR,
     `original_language` VARCHAR(2),
     `runtime` SMALLINT,
     `overview` TEXT,
