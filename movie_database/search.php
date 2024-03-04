@@ -79,7 +79,7 @@ require 'database.php';
     </header>
     <div class="menu">
         <a href="index.php">Home</a>
-        <a href="search.php">Search</a>
+        <a href="search.php"><u>Search</u></a>
     </div>
     <div class="user-account">
         <?php if (isset($_SESSION['username'])) : ?>
