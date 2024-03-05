@@ -117,6 +117,7 @@ require 'database.php';
         <a href="index.php">Home</a>
         <a href="search.php">Search</a>
         <a href="q3.php"><u>Q3</u></a>
+        <a href="q4.php">Q4</a>
     </div>
     <div class="user-account">
         <?php if (isset($_SESSION['username'])) : ?>
@@ -330,7 +331,8 @@ function mostRated($mysqli, $searchTerm) {
             AVG(CASE WHEN r.rating >= 2.5 AND r.rating <= 3.5 THEN 1 ELSE 0 END) * 100 AS rating_mid_percentage,
             AVG(CASE WHEN r.rating > 3.5 THEN 1 ELSE 0 END) * 100 AS rating_high_percentage
         FROM 
-            ratings r
+            -- ratings r
+            ratings_original r
         INNER JOIN 
             movie_genre mg ON r.movieID = mg.movieID
         GROUP BY 
@@ -365,11 +367,12 @@ function highestRated($mysqli, $searchTerm) {
         SELECT 
             mg.genreID,
             COUNT(*) AS total_ratings,
-            AVG(CASE WHEN r.rating = 1 OR r.rating = 2 THEN 1 ELSE 0 END) * 100 AS rating_low_percentage,
-            AVG(CASE WHEN r.rating = 3 THEN 1 ELSE 0 END) * 100 AS rating_mid_percentage,
-            AVG(CASE WHEN r.rating = 4 OR r.rating = 5 THEN 1 ELSE 0 END) * 100 AS rating_high_percentage
+            AVG(CASE WHEN r.rating < 2.5 THEN 1 ELSE 0 END) * 100 AS rating_low_percentage,
+            AVG(CASE WHEN r.rating >= 2.5 AND r.rating < 3.5 THEN 1 ELSE 0 END) * 100 AS rating_mid_percentage,
+            AVG(CASE WHEN r.rating >= 3.5 THEN 1 ELSE 0 END) * 100 AS rating_high_percentage
         FROM 
-            ratings r
+            -- ratings r
+            ratings_original r
         INNER JOIN 
             movie_genre mg ON r.movieID = mg.movieID
         GROUP BY 
@@ -409,13 +412,14 @@ function highestPolarisation($mysqli, $searchTerm) {
             -- AVG(CASE WHEN r.rating = 1 OR r.rating = 2 THEN 1 ELSE 0 END) * 100 AS rating_low_percentage,
             -- AVG(CASE WHEN r.rating = 3 THEN 1 ELSE 0 END) * 100 AS rating_mid_percentage,
             -- AVG(CASE WHEN r.rating = 4 OR r.rating = 5 THEN 1 ELSE 0 END) * 100 AS rating_high_percentage
-            AVG(CASE WHEN r.rating = 1 THEN 1 ELSE 0 END) * 100 AS rating_1,
-            AVG(CASE WHEN r.rating = 2 THEN 1 ELSE 0 END) * 100 AS rating_2,
-            AVG(CASE WHEN r.rating = 3 THEN 1 ELSE 0 END) * 100 AS rating_3,
-            AVG(CASE WHEN r.rating = 4 THEN 1 ELSE 0 END) * 100 AS rating_4,
-            AVG(CASE WHEN r.rating = 5 THEN 1 ELSE 0 END) * 100 AS rating_5
+            AVG(CASE WHEN r.rating = 1 OR r.rating = 0.5 THEN 1 ELSE 0 END) * 100 AS rating_1,
+            AVG(CASE WHEN r.rating = 2 OR r.rating = 1.5 THEN 1 ELSE 0 END) * 100 AS rating_2,
+            AVG(CASE WHEN r.rating = 3 OR r.rating = 2.5 THEN 1 ELSE 0 END) * 100 AS rating_3,
+            AVG(CASE WHEN r.rating = 4 OR r.rating = 3.5 THEN 1 ELSE 0 END) * 100 AS rating_4,
+            AVG(CASE WHEN r.rating = 5 OR r.rating = 4.5 THEN 1 ELSE 0 END) * 100 AS rating_5
         FROM 
-            ratings r
+            -- ratings r
+            ratings_original r
         INNER JOIN 
             movie_genre mg ON r.movieID = mg.movieID
         GROUP BY 

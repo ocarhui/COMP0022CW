@@ -108,16 +108,16 @@ CREATE TABLE `movie_database`.`ratings` (
     FOREIGN KEY (`rating_userID`) REFERENCES `rating_users`(`rating_userID`)
 ) ENGINE = InnoDB;
 
--- CREATE TABLE `movie_database`.`ratings` (
---     `ratingID` INT NOT NULL,
---     `rating_userID` VARCHAR(32) NOT NULL,
---     `movieID` INT NOT NULL,
---     `rating` FLOAT(3,1) NOT NULL,
---     `timestamp` TIMESTAMP NOT NULL,
---     PRIMARY KEY (`ratingID`),
---     FOREIGN KEY (`movieID`) REFERENCES `movies`(`movieID`),
---     FOREIGN KEY (`rating_userID`) REFERENCES `rating_users`(`rating_userID`)
--- ) ENGINE = InnoDB;
+CREATE TABLE `movie_database`.`ratings_original` (
+    `ratingID` INT NOT NULL,
+    `rating_userID` INT NOT NULL,
+    `movieID` INT NOT NULL,
+    `rating` FLOAT(3,1) NOT NULL,
+    `timestamp` TIMESTAMP NOT NULL,
+    PRIMARY KEY (`ratingID`),
+    FOREIGN KEY (`movieID`) REFERENCES `movies`(`movieID`)
+    -- FOREIGN KEY (`rating_userID`) REFERENCES `rating_users`(`rating_userID`)
+) ENGINE = InnoDB;
 
 CREATE TABLE `movie_database`.`tags` (
     `tagID` INT NOT NULL,

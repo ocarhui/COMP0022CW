@@ -313,25 +313,25 @@
         }
     }
 
-    // // Loading ratings_original
-    // $result = $mysqli->query("SELECT * FROM `ratings` LIMIT 1");
-    // if ($result && $result->num_rows > 0) {
-    //     // echo "Table 'ratings' is not empty. No need to load data.\n";
-    // } else {
-    //     $loadDataSQL = "LOAD DATA LOCAL INFILE 'Data/ratings_original.csv'
-    //                     INTO TABLE `ratings`
-    //                     FIELDS TERMINATED BY ','
-    //                     LINES TERMINATED BY '\n'
-    //                     IGNORE 1 LINES
-    //                     (ratingID, rating_userID, movieID, rating, timestamp)";
+    // Loading ratings_original
+    $result = $mysqli->query("SELECT * FROM `ratings_original` LIMIT 1");
+    if ($result && $result->num_rows > 0) {
+        // echo "Table 'ratings_original' is not empty. No need to load data.\n";
+    } else {
+        $loadDataSQL = "LOAD DATA LOCAL INFILE 'Data/ratings_original.csv'
+                        INTO TABLE `ratings_original`
+                        FIELDS TERMINATED BY ','
+                        LINES TERMINATED BY '\n'
+                        IGNORE 1 LINES
+                        (ratingID, rating_userID, movieID, rating, timestamp)";
         
-    //     // Execute the SQL statement
-    //     if ($mysqli->query($loadDataSQL) === TRUE) {
-    //         // echo "ratings.csv loaded successfully.\n";
-    //     } else {
-    //         echo "Error loading data: " . $mysqli->error;
-    //     }
-    // }
+        // Execute the SQL statement
+        if ($mysqli->query($loadDataSQL) === TRUE) {
+            // echo "ratings_original.csv loaded successfully.\n";
+        } else {
+            echo "Error loading data: " . $mysqli->error;
+        }
+    }
 
 
 ?>
