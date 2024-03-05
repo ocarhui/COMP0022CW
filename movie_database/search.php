@@ -140,66 +140,66 @@ require 'database.php';
             echo "<tr> <th> </th> <th>Title</th> <th>Year</th> <th>Original Language</th> <th>Runtime</th> <th>Overview</th> <th>TMDB Popularity</th> <th>IMDB Rating</th> </tr>";
             while ($row = $result->fetch_assoc()) {
                 $title = htmlspecialchars($row['title']);
-            $year = htmlspecialchars($row['release_year']);
-            if ($row['original_language'] !== null) {
-                $original_language = htmlspecialchars($row['original_language']);
-            } else {
-                $original_language = null;
-            }
-            if ($row['runtime'] !== null) {
-                $runtime = htmlspecialchars($row['runtime']);
-            } else {
-                $runtime = null;
-            }
-            $overview = htmlspecialchars($row['overview']);
-            $overview = strlen($overview) > 200 ? substr($overview, 0, 200) . "..." : $overview;
-            $poster_URL = htmlspecialchars($row['poster_URL']);
-            if ($row['box_office'] !== null) {
-                $box_office = htmlspecialchars($row['box_office']);
-            } else {
-                $box_office = null;
-            }
-            if ($row['budget'] !== null) {
-                $budget = htmlspecialchars($row['budget']);
-            } else {
-                $budget = null;
-            }
-            if ($row['tmdb_popularity'] !== null) {
-                $tmdb_popularity = htmlspecialchars($row['tmdb_popularity']);
-            } else {
-                $tmdb_popularity = null;
-            }
-            if ($row['imdb_rating'] !== null) {
-                $imdb_rating = htmlspecialchars($row['imdb_rating']);
-            } else {
-                $imdb_rating = null;
-            }
-            echo "<tr>"; // Start a new row for each record
-            echo "<td>" . "<img src='$poster_URL' alt='poster' width='150' height='225'>" . "</td>" ;
-            echo "<td><a href='movie_details.php?id=" . $row["movieID"] . "'><b>" . $title . "</b></a></td>\n"; 
-            echo "<td>" . $year . "</td>";
-            if ($original_language !== null) {
-                echo "<td>" . $original_language . "</td>";
-            } else {
-                echo "<td> N/A </td>";
-            }
-            if ($runtime !== null) {
-                echo "<td>" . $runtime . "</td>";
-            } else {
-                echo "<td> N/A </td>";
-            }
-            echo "<td>" . $overview . "</td>";
-            if ($tmdb_popularity !== null) {
-                echo "<td>" . $tmdb_popularity . "</td>";
-            } else {
-                echo "<td> N/A </td>";
-            }
-            if ($imdb_rating !== null) {
-                echo "<td>" . $imdb_rating . "</td>";
-            } else {
-                echo "<td> N/A </td>";
-            }
-            echo "</tr>";
+                $year = htmlspecialchars($row['release_year']);
+                if ($row['original_language'] !== null) {
+                    $original_language = htmlspecialchars($row['original_language']);
+                } else {
+                    $original_language = null;
+                }
+                if ($row['runtime'] !== null) {
+                    $runtime = htmlspecialchars($row['runtime']);
+                } else {
+                    $runtime = null;
+                }
+                $overview = htmlspecialchars($row['overview']);
+                $overview = strlen($overview) > 200 ? substr($overview, 0, 200) . "..." : $overview;
+                $poster_URL = htmlspecialchars($row['poster_URL']);
+                if ($row['box_office'] !== null) {
+                    $box_office = htmlspecialchars($row['box_office']);
+                } else {
+                    $box_office = null;
+                }
+                if ($row['budget'] !== null) {
+                    $budget = htmlspecialchars($row['budget']);
+                } else {
+                    $budget = null;
+                }
+                if ($row['tmdb_popularity'] !== null) {
+                    $tmdb_popularity = htmlspecialchars($row['tmdb_popularity']);
+                } else {
+                    $tmdb_popularity = null;
+                }
+                if ($row['imdb_rating'] !== null) {
+                    $imdb_rating = htmlspecialchars($row['imdb_rating']);
+                } else {
+                    $imdb_rating = null;
+                }
+                echo "<tr>"; // Start a new row for each record
+                echo "<td>" . "<img src='$poster_URL' alt='poster' width='150' height='225'>" . "</td>" ;
+                echo "<td><a href='movie_details.php?id=" . $row["movieID"] . "'><b>" . $title . "</b></a></td>\n"; 
+                echo "<td>" . $year . "</td>";
+                if ($original_language !== null) {
+                    echo "<td>" . $original_language . "</td>";
+                } else {
+                    echo "<td> N/A </td>";
+                }
+                if ($runtime !== null) {
+                    echo "<td>" . $runtime . "</td>";
+                } else {
+                    echo "<td> N/A </td>";
+                }
+                echo "<td>" . $overview . "</td>";
+                if ($tmdb_popularity !== null) {
+                    echo "<td>" . $tmdb_popularity . "</td>";
+                } else {
+                    echo "<td> N/A </td>";
+                }
+                if ($imdb_rating !== null) {
+                    echo "<td>" . $imdb_rating . "</td>";
+                } else {
+                    echo "<td> N/A </td>";
+                }
+                echo "</tr>";
             }
             
             echo "</table>";
