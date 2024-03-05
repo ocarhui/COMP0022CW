@@ -111,6 +111,7 @@ $all_columns = [
     <div class="menu">
         <a href="index.php"><u>Home</u></a>
         <a href="search.php">Search</a>
+        <a href="q3.php">Q3</a>
     </div>
     <div class="user-account">
         <?php if (isset($_SESSION['username'])) : ?>
