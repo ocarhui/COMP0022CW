@@ -14,6 +14,10 @@ $movie_details = [];
 $genres = [];
 $actors = null;
 $directors = null;
+$companies = null;
+$countries = null;
+$initial_ratings = null;
+$tags = null;
 
 // Fetch movie details if a valid movie_id is provided
 if ($movie_id > 0) {
@@ -57,6 +61,32 @@ if ($movie_id > 0) {
                      AND mc.occupationID = 2" ;
     
     $directors = $mysqli->query($query_director);
+
+    $query_companies = "SELECT cp.companyName
+                        FROM production_companies cp
+                        LEFT JOIN movie_production_companies mpc ON cp.companyID = mpc.companyID
+                        WHERE mpc.movieID = $movie_id";
+    $companies = $mysqli->query($query_companies);
+
+    $query_countries = "SELECT pc.countryName
+                        FROM production_countries pc
+                        LEFT JOIN movie_countries mc ON pc.countryID = mc.countryID
+                        WHERE mc.movieID = $movie_id";
+
+    $countries = $mysqli->query($query_countries);
+
+    $query_ratings = "SELECT rt.rating
+                      FROM ratings rt
+                      WHERE rt.movieID = $movie_id";
+
+    $initial_ratings = $mysqli->query($query_ratings);
+
+    $query_tags = "SELECT t.tag
+                   FROM tags t
+                   LEFT JOIN movie_tags tg ON t.tagID = tg.tagID
+                   WHERE tg.movieID = $movie_id";
+    
+    $tags = $mysqli->query($query_tags);
 }
 
 
@@ -105,8 +135,6 @@ if ($movie_id > 0) {
         .movie-title { font-size: 30px; margin: 20px 0; }
         .movie-details { margin-bottom: 20px; }
         .movie-genres { font-style: italic; }
-        .movie-overview { margin-left: 75px; margin-right: 75px} 
-        .movie-money { margin-left: 75px; margin-right: 75px}
         .back-button {
             padding: 10px 20px;
             margin: 10px 0;
@@ -159,7 +187,26 @@ if ($movie_id > 0) {
             <div class="movie-details">
                 <div class="movie-title"><b><?php echo htmlspecialchars($movie_details['title']); ?></b></div>
 
-                <div><b>Year:</b> <?php echo htmlspecialchars($movie_details['release_year']); ?></div>
+                <div><b>Year:</b> <?php echo htmlspecialchars($movie_details['release_year']); ?> | 
+                    <b>Runtime:</b> <?php echo htmlspecialchars($movie_details['runtime']); ?> minutes |
+                    <b>IMDB Rating:</b> <?php echo htmlspecialchars($movie_details['imdb_rating']); ?> |
+                    <b>IMDB Votes:</b> <?php echo htmlspecialchars($movie_details['imdb_rating_votes']); ?> |
+                    <b>TMDB Popularity:</b> <?php echo htmlspecialchars($movie_details['tmdb_popularity']); ?> |
+                    <b> Average Rating:</b> <?php
+                        $total = 0;
+                        $numRating = 0;
+                        while ($currentRow = $initial_ratings->fetch_assoc()) {
+                            $total = $total + $currentRow['rating'];
+                            $numRating = $numRating + 1;
+                        }
+                        $avgRating = $total / $numRating;
+                        echo htmlspecialchars($avgRating);
+                        echo " | <b>Number of Ratings:</b> " . htmlspecialchars($numRating);
+
+
+                    ?>
+
+                </div>
 
                 <div class="movie-genres"><b>Genres: </b>
                     <?php 
@@ -169,11 +216,11 @@ if ($movie_id > 0) {
                             echo "<span class='genre'>" . htmlspecialchars($genre) . "</span> ";
                         }
                         
-                        echo "</div>";
                     }
 
                     ?>
                 </div>
+
 
                 <div class="movie-actors"><b>Actors: </b>
                     <?php 
@@ -190,7 +237,7 @@ if ($movie_id > 0) {
                         if ($previousRow !== null) {
                             // Process the previous row here, because you skipped it in the previous iteration
                             // Note: On the first iteration, this will be skipped
-                            echo "<span class='actor'><b>" . htmlspecialchars($previousRow['name']) . "</b> ( Character: " . $previousRow['characters'] . "), </span> ";
+                            echo "<span class='actor'><b>" . htmlspecialchars($previousRow['name']) . "</b> ( Character: " . $previousRow['characters'] . ") | </span> ";
                         }
                     
                         // If $nextRow is false, then $currentRow is the last row
@@ -207,7 +254,6 @@ if ($movie_id > 0) {
                     
                     }
 
-                    echo "</div>";
 
                     ?>
                 </div>
@@ -227,7 +273,7 @@ if ($movie_id > 0) {
                         if ($previousRow !== null) {
                             // Process the previous row here, because you skipped it in the previous iteration
                             // Note: On the first iteration, this will be skipped
-                            echo "<span class='director'>" . htmlspecialchars($previousRow['name']) . ", </span> ";
+                            echo "<span class='director'>" . htmlspecialchars($previousRow['name']) . "| </span> ";
                         }
                     
                         // If $nextRow is false, then $currentRow is the last row
@@ -244,14 +290,122 @@ if ($movie_id > 0) {
                     
                     }
 
-                    echo "</div>";
+                    ?>
+                </div>
+
+                <div class="movie-companies"><b>Production Companies: </b>
+                    <?php 
+                    $previousRow = null; // Initialize to null; will hold the row for processing in the loop
+
+                    // Fetch the first row
+                    $currentRow = $companies->fetch_assoc();
+                    
+                    // Continue if there is at least one row
+                    while ($currentRow) {
+                        // Fetch the next row to check if the current row is the last
+                        $nextRow = $companies->fetch_assoc();
+                    
+                        if ($previousRow !== null) {
+                            // Process the previous row here, because you skipped it in the previous iteration
+                            // Note: On the first iteration, this will be skipped
+                            echo "<span class='company'>" . htmlspecialchars($previousRow['companyName']) . "| </span> ";
+                        }
+                    
+                        // If $nextRow is false, then $currentRow is the last row
+                        if (!$nextRow) {
+                            // Process the last row
+                            echo "<span class='company'>" . htmlspecialchars($currentRow['companyName']) . " </span> ";
+                            // Optionally, do something special because it's the last row
+                            break; // Exit the loop
+                        }
+                    
+                        // Set up for the next iteration
+                        $previousRow = $currentRow; // Move $currentRow to $previousRow for processing in the next iteration
+                        $currentRow = $nextRow; // Move $nextRow to $currentRow for checking in the next iteration
+                    
+                    }
 
                     ?>
                 </div>
 
-                <div class = "movie-overview"><b>Overview:</b> <?php echo htmlspecialchars($movie_details['overview']); ?></div>
+                <div class="movie-countries"><b>Production Countries: </b>
+                    <?php 
+                    $previousRow = null; // Initialize to null; will hold the row for processing in the loop
 
-                <div class = "movie-money"><b>Budget:</b> <?php echo htmlspecialchars($movie_details['budget']); ?> <b>Box Office:</b> <?php echo htmlspecialchars($movie_details['box_office']); ?> </div>
+                    // Fetch the first row
+                    $currentRow = $countries->fetch_assoc();
+                    
+                    // Continue if there is at least one row
+                    while ($currentRow) {
+                        // Fetch the next row to check if the current row is the last
+                        $nextRow = $countries->fetch_assoc();
+                    
+                        if ($previousRow !== null) {
+                            // Process the previous row here, because you skipped it in the previous iteration
+                            // Note: On the first iteration, this will be skipped
+                            echo "<span class='country'>" . htmlspecialchars($previousRow['countryName']) . "| </span> ";
+                        }
+                    
+                        // If $nextRow is false, then $currentRow is the last row
+                        if (!$nextRow) {
+                            // Process the last row
+                            echo "<span class='country'>" . htmlspecialchars($currentRow['countryName']) . " </span> ";
+                            // Optionally, do something special because it's the last row
+                            break; // Exit the loop
+                        }
+                    
+                        // Set up for the next iteration
+                        $previousRow = $currentRow; // Move $currentRow to $previousRow for processing in the next iteration
+                        $currentRow = $nextRow; // Move $nextRow to $currentRow for checking in the next iteration
+                    
+                    }
+
+                    ?>
+                </div>
+
+                <div class = "movie-overview"><b>Overview:</b> 
+                    <?php echo htmlspecialchars($movie_details['overview']); ?>
+                </div>
+
+                <div class = "movie-money"><b>Budget:</b> 
+                    <?php echo htmlspecialchars('$'.$movie_details['budget']); ?> | <b>Box Office:</b> <?php echo htmlspecialchars('$'.$movie_details['box_office']); ?> 
+                </div>
+
+                <div class="movie-tags"><b>Tag(s): </b>
+                    <?php 
+                    $previousRow = null; // Initialize to null; will hold the row for processing in the loop
+
+                    // Fetch the first row
+                    $currentRow = $tags->fetch_assoc();
+                    
+                    // Continue if there is at least one row
+                    while ($currentRow) {
+                        // Fetch the next row to check if the current row is the last
+                        $nextRow = $tags->fetch_assoc();
+                    
+                        if ($previousRow !== null) {
+                            // Process the previous row here, because you skipped it in the previous iteration
+                            // Note: On the first iteration, this will be skipped
+                            echo "<span class='director'>" . htmlspecialchars($previousRow['tag']) . "| </span> ";
+                        }
+                    
+                        // If $nextRow is false, then $currentRow is the last row
+                        if (!$nextRow) {
+                            // Process the last row
+                            echo "<span class='director'>" . htmlspecialchars($currentRow['tag']) . " </span> ";
+                            // Optionally, do something special because it's the last row
+                            break; // Exit the loop
+                        }
+                    
+                        // Set up for the next iteration
+                        $previousRow = $currentRow; // Move $currentRow to $previousRow for processing in the next iteration
+                        $currentRow = $nextRow; // Move $nextRow to $currentRow for checking in the next iteration
+                    
+                    }
+
+                    ?>
+                </div>
+
             </div>
         <?php else: ?>
             <div>Movie details not found.</div>

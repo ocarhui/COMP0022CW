@@ -226,6 +226,7 @@ function searchMovies($mysqli, $searchTerm) {
     $sql = "SELECT m.*, ";
     $sql .= "GROUP_CONCAT(DISTINCT c.name SEPARATOR ', ') AS crew, ";
     $sql .= "GROUP_CONCAT(DISTINCT co.countryName SEPARATOR ', ') AS countries ";
+    //$sql .= "GROUP_CONCAT(DISTINCT cp.companyName SEPARATOR ', ') AS companies ";
     $sql .= "FROM movies m ";
     $sql .= "LEFT JOIN movie_genre mg ON m.movieID = mg.movieID ";
     $sql .= "LEFT JOIN genre g ON mg.genreID = g.genreID ";
@@ -233,11 +234,14 @@ function searchMovies($mysqli, $searchTerm) {
     $sql .= "LEFT JOIN crew c ON mc.crewID = c.crewID ";
     $sql .= "LEFT JOIN movie_countries ct ON m.movieID = ct.movieID ";
     $sql .= "LEFT JOIN production_countries co ON ct.countryID = co.countryID ";
+    $sql .= "LEFT JOIN movie_production_companies mpc ON m.movieID = mpc.movieID ";
+    $sql .= "LEFT JOIN production_companies cp ON mpc.companyID = cp.companyID ";
     $sql .= "WHERE m.title LIKE '$searchTerm' OR ";
     $sql .= "c.name LIKE '$searchTerm' OR ";
     $sql .= "g.genreName LIKE '$searchTerm' OR ";
     $sql .= "co.countryName LIKE '$searchTerm' OR ";
-    $sql .= "m.release_year LIKE '$searchTerm' ";
+    $sql .= "m.release_year LIKE '$searchTerm' OR ";
+    $sql .= "cp.companyName LIKE '$searchTerm' ";
     $sql .= "GROUP BY m.movieID";
 
     // Execute the query
