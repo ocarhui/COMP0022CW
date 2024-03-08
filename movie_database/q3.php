@@ -333,7 +333,7 @@ function mostRated($mysqli, $searchTerm) {
             AVG(CASE WHEN r.rating > 3.5 THEN 1 ELSE 0 END) * 100 AS rating_high_percentage
         FROM 
             -- ratings r
-            ratings_original r
+             ratings r
         INNER JOIN 
             movie_genre mg ON r.movieID = mg.movieID
         GROUP BY 
@@ -373,7 +373,7 @@ function highestRated($mysqli, $searchTerm) {
             AVG(CASE WHEN r.rating >= 3.5 THEN 1 ELSE 0 END) * 100 AS rating_high_percentage
         FROM 
             -- ratings r
-            ratings_original r
+             ratings r
         INNER JOIN 
             movie_genre mg ON r.movieID = mg.movieID
         GROUP BY 
@@ -420,7 +420,7 @@ function highestPolarisation($mysqli, $searchTerm) {
             AVG(CASE WHEN r.rating = 5 OR r.rating = 4.5 THEN 1 ELSE 0 END) * 100 AS rating_5
         FROM 
             -- ratings r
-            ratings_original r
+             ratings r
         INNER JOIN 
             movie_genre mg ON r.movieID = mg.movieID
         GROUP BY 

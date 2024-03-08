@@ -158,18 +158,18 @@ require 'database.php';
 <div class="search-container">
     <form method="post">
         <h3>
-        Sample
+        Reaction of top
         <input type="number" id="one_sample_percentage" name="one_sample_percentage" placeholder="30" value="<?php echo isset($_POST['one_sample_percentage']) ? $_POST['one_sample_percentage'] : ''; ?>">
-        % of ratings for movie 
+        % active users to movie 
         <input type="text" id="movie" name="movie" placeholder="Movie ID..." value="<?php echo isset($_POST['movie']) ? $_POST['movie'] : ''; ?>" required>
         <input type="submit" name="MovieID" value="Submit">
         </h3>
     </form>
     <form method="post">
         <h3>
-        Sample
+        Reaction of top
         <input type="number" id="top_sample_percentage" name="top_sample_percentage" placeholder="30" value="<?php echo isset($_POST['top_sample_percentage']) ? $_POST['top_sample_percentage'] : ''; ?>">
-        % of ratings for top 
+        % active users to top 
         <select id="number_selection" name="number_selection" required>
             <option value="" disabled selected>Select...</option>
             <?php
@@ -219,10 +219,12 @@ require 'database.php';
             echo "<table border='0'>";
 
             // Table headers
-            echo "<tr> <th>Predicting Rating</th> <th>Overall Rating</th> <th>Accuracy of Prediction</th> </tr>";
+            echo "<tr> <th>Movie</th> <th>Predicting Rating</th> <th>Overall Rating</th> <th>Accuracy of Prediction</th> </tr>";
 
             // Table contents
             $row = $result->fetch_assoc();
+            $movie = $row['movieID'];
+            $title = $row['title'];
             $sample_number = $row['sample_number'];
             $sample_average = isset($row['sample_average']) ? $row['sample_average'] : 0;
             $total_number = $row['total_number'];
@@ -230,6 +232,7 @@ require 'database.php';
             $accuracy = (1 - abs($sample_average - $total_average) / $total_average) * 100;
 
             echo "<tr>";
+            echo "<td><a href='movie_details.php?id=" . $movie . "' target='_blank'><b>" . $title . "</b></a></td>";
             echo "<td>" . round($sample_average, 2) . " (" . $sample_number . ")</td>";
             echo "<td>" . round($total_average, 2) . " (" . $total_number. ")</td>";
             echo "<td>" . round($accuracy, 2) . "%</td>";
@@ -268,11 +271,12 @@ require 'database.php';
             echo "<table border='0'>";
 
             // Table headers
-            echo "<tr> <th>Movie ID</th> <th>Predicting Rating</th> <th>Overall Rating</th> <th>Accuracy of Prediction</th> </tr>";
+            echo "<tr> <th>Movie</th> <th>Predicting Rating</th> <th>Overall Rating</th> <th>Accuracy of Prediction</th> </tr>";
 
             // Table contents
             while ($row = $result->fetch_assoc()) {
                 $movie = $row['movieID'];
+                $title = $row['title'];
                 $sample_number = $row['sample_number'];
                 $sample_average = isset($row['sample_average']) ? $row['sample_average'] : 0;
                 $total_number = $row['total_number'];
@@ -280,7 +284,8 @@ require 'database.php';
                 $accuracy = (1 - abs($sample_average - $total_average) / $total_average) * 100;
 
                 echo "<tr>";
-                echo "<td>" . $movie . "</td>";
+                // echo "<td>" . $movie . "</td>";
+                echo "<td><a href='movie_details.php?id=" . $movie . "' target='_blank'><b>" . $title . "</b></a></td>";
                 echo "<td>" . round($sample_average, 2) . " (" . $sample_number . ")</td>";
                 echo "<td>" . round($total_average, 2) . " (" . $total_number. ")</td>";
                 echo "<td>" . round($accuracy, 2) . "%</td>";
@@ -318,7 +323,7 @@ function oneMoviePrediction($mysqli, $movie, $one_sample_percentage) {
     //         movieID,
     //         rating,
     //         IF(RAND() <= $one_sample_percentage, 1, 0) AS rn
-    //     FROM ratings_original
+    //     FROM  ratings
     //     WHERE movieID = $movie
     // ) AS filtered_ratings
     // GROUP BY movieID;";
@@ -327,7 +332,7 @@ function oneMoviePrediction($mysqli, $movie, $one_sample_percentage) {
             movieID,
             COUNT(*) AS rating_count
         FROM
-            ratings_original
+             ratings
         WHERE
             movieID = $movie
         GROUP BY
@@ -340,13 +345,13 @@ function oneMoviePrediction($mysqli, $movie, $one_sample_percentage) {
             rc.rating_count,
             NTILE(100) OVER (PARTITION BY r.movieID ORDER BY rc.rating_count DESC) AS bucket
         FROM
-            ratings_original r
+             ratings r
         JOIN (
             SELECT
                 rating_userID,
                 COUNT(movieID) AS rating_count
             FROM
-                ratings_original
+                 ratings
             GROUP BY
                 rating_userID
         ) rc ON r.rating_userID = rc.rating_userID
@@ -355,10 +360,11 @@ function oneMoviePrediction($mysqli, $movie, $one_sample_percentage) {
     )
     SELECT
         rr.movieID,
+        (SELECT title FROM movies WHERE movieID = rr.movieID) AS title,
         COUNT(rr.rating) AS sample_number,
         mrc.rating_count AS total_number,
         AVG(rr.rating) AS sample_average,
-        (SELECT AVG(rating) FROM ratings_original WHERE movieID = rr.movieID) AS total_average
+        (SELECT AVG(rating) FROM  ratings WHERE movieID = rr.movieID) AS total_average
     FROM
         RankedRows rr
     JOIN
@@ -393,11 +399,11 @@ function topMoviePrediction($mysqli, $top_sample_percentage, $number_selection) 
     //         movieID,
     //         rating,
     //         IF(RAND() <= $top_sample_percentage, 1, 0) AS rn
-    //     FROM ratings_original
+    //     FROM  ratings
     // ) AS r
     // JOIN (
     //     SELECT movieID
-    //     FROM ratings_original
+    //     FROM  ratings
     //     GROUP BY movieID
     //     ORDER BY COUNT(*) DESC
     //     LIMIT $number_selection
@@ -409,7 +415,7 @@ function topMoviePrediction($mysqli, $top_sample_percentage, $number_selection) 
             movieID,
             COUNT(*) AS rating_count
         FROM
-            ratings_original
+             ratings
         GROUP BY
             movieID
         ORDER BY
@@ -423,13 +429,13 @@ function topMoviePrediction($mysqli, $top_sample_percentage, $number_selection) 
             rc.rating_count,
             NTILE(100) OVER (PARTITION BY r.movieID ORDER BY rc.rating_count DESC) AS bucket
         FROM
-            ratings_original r
+             ratings r
         JOIN (
             SELECT
                 rating_userID,
                 COUNT(movieID) AS rating_count
             FROM
-                ratings_original
+                 ratings
             GROUP BY
                 rating_userID
         ) rc ON r.rating_userID = rc.rating_userID
@@ -439,10 +445,11 @@ function topMoviePrediction($mysqli, $top_sample_percentage, $number_selection) 
     
     SELECT
         rr.movieID,
+        (SELECT title FROM movies WHERE movieID = rr.movieID) AS title,
         COUNT(rr.rating) AS sample_number,
         mrc.rating_count AS total_number,
         AVG(rr.rating) AS sample_average,
-        (SELECT AVG(rating) FROM ratings_original WHERE movieID = rr.movieID) AS total_average
+        (SELECT AVG(rating) FROM ratings WHERE movieID = rr.movieID) AS total_average
     FROM
         RankedRows rr
     JOIN

@@ -333,12 +333,12 @@ function movieReaction($mysqli, $movie, $upper, $lower) {
         t1.rating_userID,
         (
             SELECT t2.rating 
-            FROM ratings_original t2 
+            FROM  ratings t2 
             WHERE t2.rating_userID = t1.rating_userID AND t2.movieID = $movie
             LIMIT 1
         ) AS rating_for_chosen_movie
     FROM 
-        ratings_original t1
+         ratings t1
     GROUP BY 
         t1.rating_userID
     HAVING 
@@ -364,7 +364,7 @@ function genreReaction($mysqli, $target_genre, $origin_genre, $genre_upper, $gen
         SELECT 
             r.rating_userID
         FROM 
-            ratings_original r
+             ratings r
             -- ratings r
         JOIN 
             movie_genre mg ON r.movieID = mg.movieID
@@ -389,7 +389,7 @@ function genreReaction($mysqli, $target_genre, $origin_genre, $genre_upper, $gen
              AVG(r.rating) AS avg_rating_genre,
              COUNT(r.rating) AS rating_genre_count
          FROM 
-             ratings_original r
+              ratings r
             --  ratings r
          JOIN 
              movie_genre mg ON r.movieID = mg.movieID
