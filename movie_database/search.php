@@ -82,6 +82,7 @@ require 'database.php';
         <a href="search.php"><u>Search</u></a>
         <a href="q3.php">Q3</a>
         <a href="q4.php">Q4</a>
+        <a href="q5.php">Q5</a>
     </div>
     <div class="user-account">
         <?php if (isset($_SESSION['username'])) : ?>
