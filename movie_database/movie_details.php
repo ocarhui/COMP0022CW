@@ -154,9 +154,6 @@ if ($movie_id > 0) {
     
     <div class="container">
         <?php if ($movie_id > 0 && !empty($movie_details)): ?>
-            <!-- <button class="back-button" onclick="history.back()" style="cursor: pointer;">< Return</button> -->
-            <!-- <button id="backButton" class="back-button" onclick="history.back()" style="cursor: pointer; display: none;">< Return</button> -->
-
             <div class="movie-poster">
                 <img src="<?php echo htmlspecialchars($movie_details['poster_URL']); ?>"; alt='poster'; width='300' height='450'>
             <div class="movie-details">
@@ -261,13 +258,4 @@ if ($movie_id > 0) {
         <?php endif; ?>
     </div>
 </body>
-
-<!-- <script>
-    // Check if there's a previous page in the browser's history and it's not the specified URL
-    if (document.referrer !== "" && document.referrer !== "http://localhost:4000/q5.php") {
-        // If there's a previous page and it's not the specified URL, show the back button
-        document.getElementById("backButton").style.display = "inline-block";
-    }
-</script> -->
-
 </html>
