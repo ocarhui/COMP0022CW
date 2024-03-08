@@ -41,7 +41,7 @@
 
         // Execute the SQL statement
         if ($mysqli->query($loadDataSQL) === TRUE) {
-            // echo "movies.csv loaded successfully.\n";
+            // echo "movies_split.txt loaded successfully.\n";
         } else {
             echo "Error loading data: " . $mysqli->error;
         }
@@ -53,6 +53,7 @@
     if ($result && $result->num_rows > 0) {
         // echo "Table 'rating_users' is not empty. No need to load data.\n";
     } else {
+        // $loadDataSQL = "LOAD DATA LOCAL INFILE 'Data/rating_users.csv'
         $loadDataSQL = "LOAD DATA LOCAL INFILE 'Data/rating_users.csv'
                         INTO TABLE `rating_users`
                         FIELDS TERMINATED BY ','
@@ -262,7 +263,7 @@
                         FIELDS TERMINATED BY ','
                         LINES TERMINATED BY '\n'
                         IGNORE 1 LINES
-                        (movieID, rating_userID, tagID, timestamp)";
+                        (movieID, tagID)";
         
         // Execute the SQL statement
         if ($mysqli->query($loadDataSQL) === TRUE) {
@@ -303,7 +304,7 @@
                         FIELDS TERMINATED BY ','
                         LINES TERMINATED BY '\n'
                         IGNORE 1 LINES
-                        (ratingID, movieID, rating_userID, rating, timestamp)";
+                        (rating_userID, movieID, rating, timestamp)";
         
         // Execute the SQL statement
         if ($mysqli->query($loadDataSQL) === TRUE) {
@@ -312,6 +313,5 @@
             echo "Error loading data: " . $mysqli->error;
         }
     }
-
 
 ?>

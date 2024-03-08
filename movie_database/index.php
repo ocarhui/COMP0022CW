@@ -111,6 +111,9 @@ $all_columns = [
     <div class="menu">
         <a href="index.php"><u>Home</u></a>
         <a href="search.php">Search</a>
+        <a href="q3.php">Q3</a>
+        <a href="q4.php">Q4</a>
+        <a href="q5.php">Q5</a>
     </div>
     <div class="user-account">
         <?php if (isset($_SESSION['username'])) : ?>
@@ -232,10 +235,18 @@ $all_columns = [
                 } elseif ($column === 'poster_URL'){
                     if ($row[$column] == 'nan') {
                         // poster not exist
-                        echo "<td>No Poster Found</td>";
+                        echo "<td>N/A</td>";
                     } else{
                         // show poster
                         echo "<td>" . "<img src='$row[$column]' alt='poster' width='150' height='225'>" . "</td>" ;
+                    }
+                } elseif ($column === 'Title') {
+                    if ($row[$column] == 'nan') {
+                        // poster not exist
+                        echo "<td>No Title Found</td>";
+                    } else{
+                        // show poster
+                        echo "<td><a href='movie_details.php?id=" . $row['MovieID'] . "' target='_blank'><b>" . $row[$column] . "</b></a></td>";
                     }
                 } else {
                     // show exist information

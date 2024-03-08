@@ -80,6 +80,9 @@ require 'database.php';
     <div class="menu">
         <a href="index.php">Home</a>
         <a href="search.php"><u>Search</u></a>
+        <a href="q3.php">Q3</a>
+        <a href="q4.php">Q4</a>
+        <a href="q5.php">Q5</a>
     </div>
     <div class="user-account">
         <?php if (isset($_SESSION['username'])) : ?>
@@ -100,7 +103,7 @@ require 'database.php';
 
 <div class="search-container">
     <form method="get">
-        <input type="text" id="search" name="search" placeholder="Enter movie title...">
+        <input type="text" id="search" name="search" placeholder="Enter movie title..." value="<?php echo isset($_GET['search']) ? $_GET['search'] : ''; ?>" >
         <input type="submit" value="Search">
     </form>
 </div>
@@ -176,7 +179,7 @@ require 'database.php';
                 }
                 echo "<tr>"; // Start a new row for each record
                 echo "<td>" . "<img src='$poster_URL' alt='poster' width='150' height='225'>" . "</td>" ;
-                echo "<td><a href='movie_details.php?id=" . $row["movieID"] . "'><b>" . $title . "</b></a></td>\n"; 
+                echo "<td><a href='movie_details.php?id=" . $row["movieID"] . "' target='_blank'><b>" . $title . "</b></a></td>\n"; 
                 echo "<td>" . $year . "</td>";
                 if ($original_language !== null) {
                     echo "<td>" . $original_language . "</td>";
