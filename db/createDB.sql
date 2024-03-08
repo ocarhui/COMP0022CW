@@ -114,7 +114,7 @@ CREATE TABLE `movie_database`.`ratings_original` (
     `movieID` INT NOT NULL,
     `rating` FLOAT(3,1) NOT NULL,
     `timestamp` TIMESTAMP NOT NULL,
-    PRIMARY KEY (`ratingID`),
+    PRIMARY KEY (`r`),
     FOREIGN KEY (`movieID`) REFERENCES `movies`(`movieID`)
     -- FOREIGN KEY (`rating_userID`) REFERENCES `rating_users`(`rating_userID`)
 ) ENGINE = InnoDB;
