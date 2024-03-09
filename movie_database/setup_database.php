@@ -1,6 +1,6 @@
 <?php
 
-    $mysqli = new mysqli("db", "movieadmin", "secretpassword", "movie_database");
+    $mysqli = new mysqli("haproxy", "movieadmin", "secretpassword", "movie_database");
     $mysqli->query('SET GLOBAL local_infile=1');
 
     mysqli_options($mysqli, MYSQLI_OPT_LOCAL_INFILE, true);
