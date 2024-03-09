@@ -139,10 +139,19 @@ require 'database.php';
 
 <div class="search-container">
     <form method="post">
-        <!-- <input type="text" id="search" name="search" placeholder="Enter movie title..."> -->
-        <input type="submit" name="MostRated" value="Most Rated">
-        <input type="submit" name="HighestRated" value="Highest Rated">
-        <input type="submit" name="HighestPolarisation" value="Highest Polarisation">
+        <h3>
+            <!-- <input type="text" id="search" name="search" placeholder="Enter movie title..."> -->
+            <input type="submit" name="MostRated" value="Most Rated">
+            <input type="submit" name="HighestRated" value="Highest Rated">
+            <input type="submit" name="MostPolarised" value="Most Polarised">
+            <!-- SPACE --> &#160&#160&#160
+            IMDB:
+            <input type="submit" name="IMDBMost" value="Most Rated">
+            <input type="submit" name="IMDBHighest" value="Highest Rated">
+            <!-- SPACE --> &#160&#160&#160
+            TMDB:
+            <input type="submit" name="TMDB" value="Highest Rated">
+        </h3>
     </form>
 </div>
 
@@ -176,7 +185,7 @@ require 'database.php';
             echo "<table border='0'>";
 
             // Table headers
-            echo "<tr> <th>Genre</th> <th>Total Ratings</th> <th>High Ratings</th> <th>Moderate Ratings</th> <th>Low Ratings</th> </tr>";
+            echo "<tr> <th>Genre</th> <th>Number of Ratings</th> <th>High Ratings</th> <th>Moderate Ratings</th> <th>Low Ratings</th> </tr>";
 
             // Table contents
             while ($row = $result->fetch_assoc()) {
@@ -226,7 +235,7 @@ require 'database.php';
             echo "<table border='0'>";
 
             // Table headers
-            echo "<tr> <th>Genre</th> <th>Total Ratings</th> <th>High Ratings</th> <th>Moderate Ratings</th> <th>Low Ratings</th> </tr>";
+            echo "<tr> <th>Genre</th> <th>Number of Ratings</th> <th>High Ratings</th> <th>Moderate Ratings</th> <th>Low Ratings</th> </tr>";
 
             // Table contents
             while ($row = $result->fetch_assoc()) {
@@ -249,9 +258,9 @@ require 'database.php';
     }
 
     // Highest Polarisation
-    if (isset($_POST['HighestPolarisation'])) {
+    if (isset($_POST['MostPolarised'])) {
         // Assume $mysqli is already connected
-        $search = $_POST['HighestPolarisation'];
+        $search = $_POST['MostPolarised'];
         $result = highestPolarisation($mysqli, $search);
 
         if ($result) {
@@ -276,8 +285,8 @@ require 'database.php';
             echo "<table border='0'>";
 
             // Table headers
-            echo "<tr> <th>Genre</th> <th>Total Ratings</th> <th>Polarisation Index</th> <th>Rating 5</th> <th>Rating 4</th> <th>Rating 3</th> <th>Rating 2</th> <th>Rating 1</th> </tr>";
-            // echo "<tr> <th>Genre</th> <th>Total Ratings</th> <th>Polarisation Index</th> <th>Rating</th> </tr>";
+            echo "<tr> <th>Genre</th> <th>Number of Ratings</th> <th>Polarisation Index</th> <th>Rating 5</th> <th>Rating 4</th> <th>Rating 3</th> <th>Rating 2</th> <th>Rating 1</th> </tr>";
+            // echo "<tr> <th>Genre</th> <th>Number of Ratings</th> <th>Polarisation Index</th> <th>Rating</th> </tr>";
 
             // Table contents
             while ($row = $result->fetch_assoc()) {
@@ -302,6 +311,143 @@ require 'database.php';
                 // echo '<div class="low" style="width: ' . $row['rating_1'] . '%;"></div>';
                 // echo '</div></td>';
 
+            }
+            
+            echo "</table>";
+        } else {
+            echo "Query failed: " . $mysqli->error;
+        }
+    }
+
+    // IMDB Most Rating
+    if (isset($_POST['IMDBMost'])) {
+        // Assume $mysqli is already connected
+        $search = $_POST['IMDBMost'];
+        $result = IMDBMost($mysqli, $search);
+
+        if ($result) {
+            // Start the table and optionally add a border for visibility
+            echo "<p>" . mysqli_num_rows($result) . " Results</p>" ;
+            echo "<style>\n";
+            echo "body { font-family: Arial, sans-serif; }\n";
+            echo ".container {
+                width: 100%;
+                padding: 20px;
+                box-sizing: border-box;
+            }\n";
+            echo "table { width: 100%; border-collapse: collapse; table-layout: fixed; }\n";
+            echo "th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }\n";
+            echo "th { background-color: #0096FF; color: white; }\n";
+            echo "tr:nth-child(even) { background-color: #f2f2f2 }\n";
+            echo "tr:hover { background-color: #ddd; }\n";
+            echo "a { color: #333; text-decoration: none; }\n";
+            echo "a:hover { text-decoration: underline; }\n";
+            echo "</style>\n";
+            echo "<table>"; 
+            echo "<table border='0'>";
+
+            // Table headers
+            echo "<tr> <th>Genre</th> <th>Number of Movies</th> <th>Number of Ratings</th> <th>TMDB Popularity</th> </tr>";
+
+            // Table contents
+            while ($row = $result->fetch_assoc()) {
+                echo "<tr>";
+                echo "<td>" . $row['genreName'] . "</td>";
+                echo "<td>" . $row['movie_count'] . "</td>";
+                echo "<td>" . $row['number_ratings'] . "</td>";
+                echo '<td><div class="high" style="width: ' . $row['avg_popularity']*10 . '%;"></div>' . round($row['avg_popularity'], 2) . '</td>';
+                echo "</tr>";
+            }
+            
+            echo "</table>";
+        } else {
+            echo "Query failed: " . $mysqli->error;
+        }
+    }
+
+    // IMDB Highest Rating
+    if (isset($_POST['IMDBHighest'])) {
+        // Assume $mysqli is already connected
+        $search = $_POST['IMDBHighest'];
+        $result = IMDBHighest($mysqli, $search);
+
+        if ($result) {
+            // Start the table and optionally add a border for visibility
+            echo "<p>" . mysqli_num_rows($result) . " Results</p>" ;
+            echo "<style>\n";
+            echo "body { font-family: Arial, sans-serif; }\n";
+            echo ".container {
+                width: 100%;
+                padding: 20px;
+                box-sizing: border-box;
+            }\n";
+            echo "table { width: 100%; border-collapse: collapse; table-layout: fixed; }\n";
+            echo "th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }\n";
+            echo "th { background-color: #0096FF; color: white; }\n";
+            echo "tr:nth-child(even) { background-color: #f2f2f2 }\n";
+            echo "tr:hover { background-color: #ddd; }\n";
+            echo "a { color: #333; text-decoration: none; }\n";
+            echo "a:hover { text-decoration: underline; }\n";
+            echo "</style>\n";
+            echo "<table>"; 
+            echo "<table border='0'>";
+
+            // Table headers
+            echo "<tr> <th>Genre</th> <th>Number of Movies</th> <th>Number of Ratings</th> <th>TMDB Popularity</th> </tr>";
+
+            // Table contents
+            while ($row = $result->fetch_assoc()) {
+                echo "<tr>";
+                echo "<td>" . $row['genreName'] . "</td>";
+                echo "<td>" . $row['movie_count'] . "</td>";
+                echo "<td>" . $row['number_ratings'] . "</td>";
+                echo '<td><div class="high" style="width: ' . $row['avg_popularity']*10 . '%;"></div>' . round($row['avg_popularity'], 2) . '</td>';
+                echo "</tr>";
+            }
+            
+            echo "</table>";
+        } else {
+            echo "Query failed: " . $mysqli->error;
+        }
+    }
+
+    // TMDB Rating
+    if (isset($_POST['TMDB'])) {
+        // Assume $mysqli is already connected
+        $search = $_POST['TMDB'];
+        $result = TMDB($mysqli, $search);
+
+        if ($result) {
+            // Start the table and optionally add a border for visibility
+            echo "<p>" . mysqli_num_rows($result) . " Results</p>" ;
+            echo "<style>\n";
+            echo "body { font-family: Arial, sans-serif; }\n";
+            echo ".container {
+                width: 100%;
+                padding: 20px;
+                box-sizing: border-box;
+            }\n";
+            echo "table { width: 100%; border-collapse: collapse; table-layout: fixed; }\n";
+            echo "th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }\n";
+            echo "th { background-color: #0096FF; color: white; }\n";
+            echo "tr:nth-child(even) { background-color: #f2f2f2 }\n";
+            echo "tr:hover { background-color: #ddd; }\n";
+            echo "a { color: #333; text-decoration: none; }\n";
+            echo "a:hover { text-decoration: underline; }\n";
+            echo "</style>\n";
+            echo "<table>"; 
+            echo "<table border='0'>";
+
+            // Table headers
+            echo "<tr> <th>Genre</th> <th>Number of Movies</th> <th>TMDB Popularity</th> </tr>";
+
+            // Table contents
+            while ($row = $result->fetch_assoc()) {
+                echo "<tr>";
+                echo "<td>" . $row['genreName'] . "</td>";
+                echo "<td>" . $row['movie_count'] . "</td>";
+                echo '<td><div class="high" style="width: ' . $row['avg_popularity'] . '%;"></div>' . round($row['avg_popularity'], 2) . '</td>';
+                echo "</tr>";
             }
             
             echo "</table>";
@@ -450,6 +596,62 @@ function highestPolarisation($mysqli, $searchTerm) {
 
     return $result ;
 
+}
 
+function IMDBHighest($mysqli, $searchTerm) {
+    // Escape the search term to prevent SQL Injection
+    $searchTerm = $mysqli->real_escape_string($searchTerm);
+
+    // Base SQL query
+    $sql = 
+    "SELECT g.genreName, COUNT(mg.movieID) AS movie_count, AVG(m.imdb_rating) AS avg_popularity, SUM(m.imdb_rating_votes) AS number_ratings
+    FROM movie_genre mg
+    JOIN movies m ON mg.movieID = m.movieID
+    JOIN genre g ON mg.genreID = g.genreID
+    GROUP BY g.genreName
+    ORDER BY avg_popularity DESC;
+    ";
+
+    // Execute the query
+    $result = $mysqli->query($sql);
+    return $result ;
+}
+
+function IMDBMost($mysqli, $searchTerm) {
+    // Escape the search term to prevent SQL Injection
+    $searchTerm = $mysqli->real_escape_string($searchTerm);
+
+    // Base SQL query
+    $sql = 
+    "SELECT g.genreName, COUNT(mg.movieID) AS movie_count, AVG(m.imdb_rating) AS avg_popularity, SUM(m.imdb_rating_votes) AS number_ratings
+    FROM movie_genre mg
+    JOIN movies m ON mg.movieID = m.movieID
+    JOIN genre g ON mg.genreID = g.genreID
+    GROUP BY g.genreName
+    ORDER BY number_ratings DESC;
+    ";
+
+    // Execute the query
+    $result = $mysqli->query($sql);
+    return $result ;
+}
+
+function TMDB($mysqli, $searchTerm) {
+    // Escape the search term to prevent SQL Injection
+    $searchTerm = $mysqli->real_escape_string($searchTerm);
+
+    // Base SQL query
+    $sql = 
+    "SELECT g.genreName, COUNT(mg.movieID) AS movie_count, AVG(m.tmdb_popularity) AS avg_popularity
+    FROM movie_genre mg
+    JOIN movies m ON mg.movieID = m.movieID
+    JOIN genre g ON mg.genreID = g.genreID
+    GROUP BY g.genreName
+    ORDER BY avg_popularity DESC;
+    ";
+
+    // Execute the query
+    $result = $mysqli->query($sql);
+    return $result ;
 }
 ?>
