@@ -12,7 +12,7 @@ services:
     volumes:
       - "./db:/docker-entrypoint-initdb.d" # this is how we persist a sql db even when container stops
 
-  www:
+  www1:
     build:
       context: .
       dockerfile: Dockerfile  # Use the custom Dockerfile
@@ -22,16 +22,37 @@ services:
       - db 
     expose:
       - "80"
-    # ports:
-    #   - 80:80
-    # - 443:443
+
+  www2:
+    build:
+      context: .
+      dockerfile: Dockerfile  # Use the custom Dockerfile
+    volumes:
+      - "./movie_database:/var/www/html"
+    depends_on:
+      - db 
+    expose:
+      - "80"
+
+  www3:
+    build:
+      context: .
+      dockerfile: Dockerfile  # Use the custom Dockerfile
+    volumes:
+      - "./movie_database:/var/www/html"
+    depends_on:
+      - db 
+    expose:
+      - "80"
 
   nginx:
     image: nginx:latest
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
-      - www
+      - www1
+      - www2
+      - www3
     ports:
       - "4000:4000"
   

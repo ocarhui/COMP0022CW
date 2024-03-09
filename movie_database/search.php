@@ -1,9 +1,7 @@
 <?php 
 session_start();
 
-require 'setup_database.php';
-require 'database.php'; 
-
+// require 'setup_database.php';
 
 // Fetch distinct countries from the database
 ?>
@@ -113,11 +111,11 @@ require 'database.php';
     // Your PHP script for fetching and displaying search results
     if (isset($_GET['search'])) {
         // Assume $mysqli is already connected
+        require 'setup_database.php';
         $search = $_GET['search'];
         $search = "%" . $search . "%";
         $result = searchMovies($mysqli, $search);
-        //$query = "SELECT * FROM movies WHERE title LIKE $search";
-        //$result = $mysqli->query($query);
+        $mysqli->close();
 
         if ($result) {
             // Start the table and optionally add a border for visibility
@@ -206,6 +204,8 @@ require 'database.php';
             }
             
             echo "</table>";
+            $result->free();
+
         } else {
             echo "Query failed: " . $mysqli->error;
         }

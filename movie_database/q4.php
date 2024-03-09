@@ -1,8 +1,7 @@
 <?php 
 session_start();
 
-require 'setup_database.php';
-require 'database.php'; 
+// require 'setup_database.php';
 
 
 // Fetch distinct countries from the database
@@ -167,6 +166,7 @@ require 'database.php';
     // Reactions in Movies
     if (isset($_POST['MovieID'])) {
         // Assume $mysqli is already connected
+        require 'setup_database.php';
         $movie = $_POST['movie'];
         $upper = !empty($_POST['upper']) ? $_POST['upper'] : 0;
         $lower = !empty($_POST['lower']) ? $_POST['lower'] : 0;
@@ -176,6 +176,8 @@ require 'database.php';
             $lower = $temp;
         }
         $result = movieReaction($mysqli, $movie, $upper, $lower);
+        $mysqli->close();
+
         if (mysqli_num_rows($result) === 0) {
             echo "<h3>No Result</h3>";
         } elseif ($result) {
@@ -230,6 +232,7 @@ require 'database.php';
             echo '<td><div class="low" style="width: ' . $low/$count*100 . '%;"></div>' . round($low*100/$count, 2) . '% ('. $low .')</td>';
             echo "</tr>";
             echo "</table>";
+            $result->free();
             
         } else {
             echo "Query failed: " . $mysqli->error;
@@ -239,6 +242,7 @@ require 'database.php';
     // Reactions in Genres
     if (isset($_POST['GenreID'])) {
         // Assume $mysqli is already connected
+        require 'setup_database.php';
         $target_genre = $_POST['target_genre'];
         $origin_genre = $_POST['origin_genre'];
         $genre_upper = !empty($_POST['genre_upper']) ? $_POST['genre_upper'] : 0;
@@ -249,7 +253,7 @@ require 'database.php';
             $genre_lower = $temp;
         }
         $result = genreReaction($mysqli, $target_genre, $origin_genre, $genre_upper, $genre_lower);
-        
+        $mysqli->close();
         
         if (mysqli_num_rows($result) === 0) {
             echo "<h3>No Result</h3>";
@@ -307,6 +311,7 @@ require 'database.php';
             echo '<td><div class="low" style="width: ' . $low/$numviewer*100 . '%;"></div>' . round($low*100/$numviewer, 2) . '% ('. $low .')</td>';
             echo "</tr>";
             echo "</table>";
+            $result->free();
             
         } else {
             echo "Query failed: " . $mysqli->error;

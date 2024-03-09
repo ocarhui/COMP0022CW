@@ -1,8 +1,7 @@
 <?php 
 session_start();
 
-require 'setup_database.php';
-require 'database.php'; 
+// require 'setup_database.php';
 
 
 // Fetch distinct countries from the database
@@ -193,9 +192,12 @@ require 'database.php';
     // Reactions in Movies
     if (isset($_POST['MovieID'])) {
         // Assume $mysqli is already connected
+        require 'setup_database.php';
         $movie = $_POST['movie'];
         $one_sample_percentage = isset($_POST['one_sample_percentage']) && is_numeric($_POST['one_sample_percentage']) ? (int)$_POST['one_sample_percentage'] : 30;
         $result = oneMoviePrediction($mysqli, $movie, $one_sample_percentage);
+        $mysqli->close();
+
         if (mysqli_num_rows($result) === 0) {
             echo "<h3>No Result</h3>";
         } elseif ($result) {
@@ -238,6 +240,7 @@ require 'database.php';
             echo "<td>" . round($accuracy, 2) . "%</td>";
             echo "</tr>";
             echo "</table>";
+            $result->free();
         } else {
             echo "Query failed: " . $mysqli->error;
         }
@@ -245,9 +248,12 @@ require 'database.php';
 
     if (isset($_POST['TopMovies'])) {
         // Assume $mysqli is already connected
+        require 'setup_database.php';
         $number_selection = $_POST['number_selection'];
         $top_sample_percentage = isset($_POST['top_sample_percentage']) && is_numeric($_POST['top_sample_percentage']) ? (int)$_POST['top_sample_percentage'] : 30;
         $result = topMoviePrediction($mysqli, $top_sample_percentage, $number_selection);
+        $mysqli->close();
+
         if (mysqli_num_rows($result) === 0) {
             echo "<h3>No Result</h3>";
         } elseif ($result) {
@@ -292,6 +298,7 @@ require 'database.php';
                 echo "</tr>";
             }
             echo "</table>";
+            $result->free();
         } else {
             echo "Query failed: " . $mysqli->error;
         }

@@ -1,8 +1,7 @@
 <?php 
 session_start();
 
-require 'setup_database.php';
-require 'database.php'; 
+// require 'setup_database.php';
 
 
 // Fetch distinct countries from the database
@@ -160,8 +159,10 @@ require 'database.php';
     // Most Rated
     if (isset($_POST['MostRated'])) {
         // Assume $mysqli is already connected
+        require 'setup_database.php';
         $search = $_POST['MostRated'];
         $result = mostRated($mysqli, $search);
+        $mysqli->close();
 
         if ($result) {
             // Start the table and optionally add a border for visibility
@@ -202,6 +203,7 @@ require 'database.php';
             }
             
             echo "</table>";
+            $result->free();
         } else {
             echo "Query failed: " . $mysqli->error;
         }
@@ -210,8 +212,10 @@ require 'database.php';
     // Highest Rated
     if (isset($_POST['HighestRated'])) {
         // Assume $mysqli is already connected
+        require 'setup_database.php';        
         $search = $_POST['HighestRated'];
         $result = highestRated($mysqli, $search);
+        $mysqli->close();
 
         if ($result) {
             // Start the table and optionally add a border for visibility
@@ -252,6 +256,7 @@ require 'database.php';
             }
             
             echo "</table>";
+            $result->free();
         } else {
             echo "Query failed: " . $mysqli->error;
         }
@@ -260,8 +265,10 @@ require 'database.php';
     // Highest Polarisation
     if (isset($_POST['MostPolarised'])) {
         // Assume $mysqli is already connected
+        require 'setup_database.php';
         $search = $_POST['MostPolarised'];
         $result = highestPolarisation($mysqli, $search);
+        $mysqli->close();
 
         if ($result) {
             // Start the table and optionally add a border for visibility
@@ -314,6 +321,7 @@ require 'database.php';
             }
             
             echo "</table>";
+            $result->free();
         } else {
             echo "Query failed: " . $mysqli->error;
         }
@@ -322,8 +330,10 @@ require 'database.php';
     // IMDB Most Rating
     if (isset($_POST['IMDBMost'])) {
         // Assume $mysqli is already connected
+        require 'setup_database.php';
         $search = $_POST['IMDBMost'];
         $result = IMDBMost($mysqli, $search);
+        $mysqli->close();
 
         if ($result) {
             // Start the table and optionally add a border for visibility
@@ -360,6 +370,7 @@ require 'database.php';
             }
             
             echo "</table>";
+            $result->free();
         } else {
             echo "Query failed: " . $mysqli->error;
         }
@@ -368,8 +379,10 @@ require 'database.php';
     // IMDB Highest Rating
     if (isset($_POST['IMDBHighest'])) {
         // Assume $mysqli is already connected
+        require 'setup_database.php';
         $search = $_POST['IMDBHighest'];
         $result = IMDBHighest($mysqli, $search);
+        $mysqli->close();
 
         if ($result) {
             // Start the table and optionally add a border for visibility
@@ -406,6 +419,7 @@ require 'database.php';
             }
             
             echo "</table>";
+            $result->free();
         } else {
             echo "Query failed: " . $mysqli->error;
         }
@@ -414,8 +428,10 @@ require 'database.php';
     // TMDB Rating
     if (isset($_POST['TMDB'])) {
         // Assume $mysqli is already connected
+        require 'setup_database.php';        
         $search = $_POST['TMDB'];
         $result = TMDB($mysqli, $search);
+        $mysqli->close();
 
         if ($result) {
             // Start the table and optionally add a border for visibility
@@ -451,6 +467,7 @@ require 'database.php';
             }
             
             echo "</table>";
+            $result->free();
         } else {
             echo "Query failed: " . $mysqli->error;
         }

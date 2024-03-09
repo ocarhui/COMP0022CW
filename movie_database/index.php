@@ -2,7 +2,6 @@
 session_start();
 
 require 'setup_database.php';
-require 'database.php'; 
 
 // Define all available columns
 $all_columns = [
@@ -33,7 +32,7 @@ if ($result) {
 $perPage = 25;
 $total_page = intdiv($entry, $perPage) + 1;
 $offset = 0;
-// echo $total_page;
+$mysqli->close();
 ?>
 
 <!DOCTYPE html>
@@ -190,53 +189,54 @@ $offset = 0;
     </form>
 
     <?php
-    // Initialize selected columns array
-    $selected_columns = [];
+        // Initialize selected columns array
+        $selected_columns = [];
 
-    // Handle form submission
-    if (isset($_POST['submit'])) {
-        if(isset($_POST['selected_columns']) && is_array($_POST['selected_columns'])) {
-            $selected_columns = $_POST['selected_columns'];
+        // Handle form submission
+        if (isset($_POST['submit'])) {
+            if(isset($_POST['selected_columns']) && is_array($_POST['selected_columns'])) {
+                $selected_columns = $_POST['selected_columns'];
+            }
         }
-    }
-    
-    // Build the SELECT part of the SQL query
-    if (isset($_POST['selected_columns'])) {
-        // Not empty - concatenate the selected columns with "m." prefix
-        $select_part = "m.MovieID, m." . implode(", m.", $selected_columns);
-    } else {
-        // Empty - null
-        $select_part = "null";
-    }
+        
+        // Build the SELECT part of the SQL query
+        if (isset($_POST['selected_columns'])) {
+            // Not empty - concatenate the selected columns with "m." prefix
+            $select_part = "m.MovieID, m." . implode(", m.", $selected_columns);
+        } else {
+            // Empty - null
+            $select_part = "null";
+        }
 
-    // set page
-    if (isset($_POST['page'])) {
-        // Get the selected value from the $_POST array
-        $page = $_POST['page'];
-        $offset = ($page - 1) * $perPage;
-    }
+        // set page
+        if (isset($_POST['page'])) {
+            // Get the selected value from the $_POST array
+            $page = $_POST['page'];
+            $offset = ($page - 1) * $perPage;
+        }
 
-    // Set country and genre
-    $select_join = "";
-    // country
-    $select_part = str_replace("m.country", "GROUP_CONCAT(DISTINCT pc.countryName SEPARATOR ', ') AS country", $select_part);
-    if(in_array("country", $selected_columns)){
-        $select_join .= "LEFT JOIN movie_countries mc ON m.movieID = mc.movieID LEFT JOIN production_countries pc ON mc.countryID = pc.countryID ";
-    }
-    // genre
-    $select_part = str_replace("m.genre", "GROUP_CONCAT(DISTINCT genre.genreName SEPARATOR ', ') AS genre", $select_part);
-    if(in_array("genre", $selected_columns)){
-        $select_join .= "LEFT JOIN movie_genre ge ON m.movieID = ge.movieID LEFT JOIN genre ON ge.genreID = genre.genreID ";
-    }
-    $sql = 
-    "SELECT $select_part 
-    FROM movies m $select_join 
-    Group By m.MovieID
-    LIMIT $perPage OFFSET $offset;";
+        // Set country and genre
+        $select_join = "";
+        // country
+        $select_part = str_replace("m.country", "GROUP_CONCAT(DISTINCT pc.countryName SEPARATOR ', ') AS country", $select_part);
+        if(in_array("country", $selected_columns)){
+            $select_join .= "LEFT JOIN movie_countries mc ON m.movieID = mc.movieID LEFT JOIN production_countries pc ON mc.countryID = pc.countryID ";
+        }
+        // genre
+        $select_part = str_replace("m.genre", "GROUP_CONCAT(DISTINCT genre.genreName SEPARATOR ', ') AS genre", $select_part);
+        if(in_array("genre", $selected_columns)){
+            $select_join .= "LEFT JOIN movie_genre ge ON m.movieID = ge.movieID LEFT JOIN genre ON ge.genreID = genre.genreID ";
+        }
+        $sql = 
+        "SELECT $select_part 
+        FROM movies m $select_join 
+        Group By m.MovieID
+        LIMIT $perPage OFFSET $offset;";
 
-    // Execute the SQL query
-    // echo "$sql";
-    $result = $mysqli->query($sql);
+        // Execute the SQL query
+        require 'setup_database.php';
+        $result = $mysqli->query($sql);
+        $mysqli->close();
 
     ?>
 </div>
@@ -311,6 +311,7 @@ $offset = 0;
             echo "</tr>";
         }
         echo "</table>";
+        $result->free();
 
     } else {
         echo "Query failed: " . $mysqli->error;
