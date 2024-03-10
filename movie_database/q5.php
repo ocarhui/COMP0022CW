@@ -158,7 +158,7 @@ session_start();
     <form method="post">
         <h3>
         Reaction of top
-        <input type="number" id="one_sample_percentage" name="one_sample_percentage" placeholder="30" value="<?php echo isset($_POST['one_sample_percentage']) ? $_POST['one_sample_percentage'] : ''; ?>">
+        <input type="number" id="one_sample_percentage" name="one_sample_percentage" placeholder="30" value="<?php echo isset($_POST['one_sample_percentage']) ? $_POST['one_sample_percentage'] : ''; ?>" min="0" max="100">
         % active users to movie 
         <input type="text" id="movie" name="movie" placeholder="Movie ID..." value="<?php echo isset($_POST['movie']) ? $_POST['movie'] : ''; ?>" required>
         <input type="submit" name="MovieID" value="Submit">
@@ -167,7 +167,7 @@ session_start();
     <form method="post">
         <h3>
         Reaction of top
-        <input type="number" id="top_sample_percentage" name="top_sample_percentage" placeholder="30" value="<?php echo isset($_POST['top_sample_percentage']) ? $_POST['top_sample_percentage'] : ''; ?>">
+        <input type="number" id="top_sample_percentage" name="top_sample_percentage" placeholder="30" value="<?php echo isset($_POST['top_sample_percentage']) ? $_POST['top_sample_percentage'] : ''; ?>" min="0" max="100">
         % active users to top 
         <select id="number_selection" name="number_selection" required>
             <option value="" disabled selected>Select...</option>
@@ -314,11 +314,6 @@ session_start();
 <?php
 
 function oneMoviePrediction($mysqli, $movie, $one_sample_percentage) {
-    // Escape the search term to prevent SQL Injection
-    $movie = $mysqli->real_escape_string($movie);
-    $one_sample_percentage = $mysqli->real_escape_string($one_sample_percentage);
-
-    // Base SQL query
     $sql = 
     // "SELECT 
     //     COUNT(*) AS total_number_of_ratings,
@@ -341,7 +336,7 @@ function oneMoviePrediction($mysqli, $movie, $one_sample_percentage) {
         FROM
              ratings
         WHERE
-            movieID = $movie
+            movieID = (SELECT movieID FROM movies WHERE title = ?)
         GROUP BY
             movieID
     ), RankedRows AS (
@@ -377,23 +372,21 @@ function oneMoviePrediction($mysqli, $movie, $one_sample_percentage) {
     JOIN
         MovieRatingCounts mrc ON rr.movieID = mrc.movieID
     WHERE
-        rr.bucket <= $one_sample_percentage
+        rr.bucket <= ?
     GROUP BY
         rr.movieID,
         mrc.rating_count;";
 
-    // Execute the query
-    $result = $mysqli->query($sql);
+    $stmt = $mysqli->prepare($sql);
+    $stmt->bind_param("si", $movie, $one_sample_percentage);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $stmt->close();
 
     return $result ;
 }
 
 function topMoviePrediction($mysqli, $top_sample_percentage, $number_selection) {
-    // Escape the search term to prevent SQL Injection
-    $top_sample_percentage = $mysqli->real_escape_string($top_sample_percentage);
-    $number_selection = $mysqli->real_escape_string($number_selection);
-
-    // Base SQL query
     $sql = 
     // "SELECT 
     //     r.movieID,
@@ -427,7 +420,7 @@ function topMoviePrediction($mysqli, $top_sample_percentage, $number_selection) 
             movieID
         ORDER BY
             rating_count DESC
-        LIMIT $number_selection
+        LIMIT ?
     ), RankedRows AS (
         SELECT
             r.movieID,
@@ -462,15 +455,18 @@ function topMoviePrediction($mysqli, $top_sample_percentage, $number_selection) 
     JOIN
         MovieRatingCounts mrc ON rr.movieID = mrc.movieID
     WHERE
-        rr.bucket <= $top_sample_percentage
+        rr.bucket <= ?
     GROUP BY
         rr.movieID,
         mrc.rating_count
     ORDER BY
         total_number DESC;";
 
-    // Execute the query
-    $result = $mysqli->query($sql);
+    $stmt = $mysqli->prepare($sql);
+    $stmt->bind_param("ii", $number_selection, $top_sample_percentage);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $stmt->close();
 
     return $result ;
 }

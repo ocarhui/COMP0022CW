@@ -126,3 +126,4 @@ INSERT INTO `movie_database`.`users` (`username`, `email`, `password`) VALUES ('
 CREATE USER 'movieadmin' IDENTIFIED BY 'secretpassword';
 GRANT INSERT, SELECT ON `movie_database`.* TO 'movieadmin' WITH GRANT OPTION;
 GRANT SUPER ON *.* TO 'movieadmin';
+-- GRANT EXECUTE ON PROCEDURE movie_database.similarity TO 'movieadmin'@'%';

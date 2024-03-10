@@ -9,6 +9,7 @@ services:
       - MYSQL_USER=php_docker
       - MYSQL_PASSWORD=password
       - MYSQL_ALLOW_EMPTY_PASSWORD=1
+      # MYSQL_ROOT_PASSWORD: password
     volumes:
       - "./db:/docker-entrypoint-initdb.d"
 
@@ -20,6 +21,7 @@ services:
       - MYSQL_USER=php_docker
       - MYSQL_PASSWORD=password
       - MYSQL_ALLOW_EMPTY_PASSWORD=1
+      # MYSQL_ROOT_PASSWORD: password
     volumes:
       - "./db:/docker-entrypoint-initdb.d"
 
@@ -31,6 +33,7 @@ services:
       - MYSQL_USER=php_docker
       - MYSQL_PASSWORD=password
       - MYSQL_ALLOW_EMPTY_PASSWORD=1
+      # MYSQL_ROOT_PASSWORD: password
     volumes:
       - "./db:/docker-entrypoint-initdb.d"
 

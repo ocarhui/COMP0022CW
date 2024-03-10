@@ -160,8 +160,7 @@ session_start();
     if (isset($_POST['MostRated'])) {
         // Assume $mysqli is already connected
         require 'setup_database.php';
-        $search = $_POST['MostRated'];
-        $result = mostRated($mysqli, $search);
+        $result = mostRated($mysqli);
         $mysqli->close();
 
         if ($result) {
@@ -213,8 +212,7 @@ session_start();
     if (isset($_POST['HighestRated'])) {
         // Assume $mysqli is already connected
         require 'setup_database.php';        
-        $search = $_POST['HighestRated'];
-        $result = highestRated($mysqli, $search);
+        $result = highestRated($mysqli);
         $mysqli->close();
 
         if ($result) {
@@ -266,8 +264,7 @@ session_start();
     if (isset($_POST['MostPolarised'])) {
         // Assume $mysqli is already connected
         require 'setup_database.php';
-        $search = $_POST['MostPolarised'];
-        $result = highestPolarisation($mysqli, $search);
+        $result = highestPolarisation($mysqli);
         $mysqli->close();
 
         if ($result) {
@@ -331,8 +328,7 @@ session_start();
     if (isset($_POST['IMDBMost'])) {
         // Assume $mysqli is already connected
         require 'setup_database.php';
-        $search = $_POST['IMDBMost'];
-        $result = IMDBMost($mysqli, $search);
+        $result = IMDBMost($mysqli);
         $mysqli->close();
 
         if ($result) {
@@ -380,8 +376,7 @@ session_start();
     if (isset($_POST['IMDBHighest'])) {
         // Assume $mysqli is already connected
         require 'setup_database.php';
-        $search = $_POST['IMDBHighest'];
-        $result = IMDBHighest($mysqli, $search);
+        $result = IMDBHighest($mysqli);
         $mysqli->close();
 
         if ($result) {
@@ -429,8 +424,7 @@ session_start();
     if (isset($_POST['TMDB'])) {
         // Assume $mysqli is already connected
         require 'setup_database.php';        
-        $search = $_POST['TMDB'];
-        $result = TMDB($mysqli, $search);
+        $result = TMDB($mysqli);
         $mysqli->close();
 
         if ($result) {
@@ -481,10 +475,7 @@ session_start();
 
 <?php
 
-function mostRated($mysqli, $searchTerm) {
-    // Escape the search term to prevent SQL Injection
-    $searchTerm = $mysqli->real_escape_string($searchTerm);
-
+function mostRated($mysqli) {
     // Base SQL query
     $sql = 
     "WITH RatingStats AS (
@@ -521,10 +512,7 @@ function mostRated($mysqli, $searchTerm) {
     return $result ;
 }
 
-function highestRated($mysqli, $searchTerm) {
-    // Escape the search term to prevent SQL Injection
-    $searchTerm = $mysqli->real_escape_string($searchTerm);
-
+function highestRated($mysqli) {
     // Base SQL query
     $sql = 
     "WITH RatingStats AS (
@@ -562,10 +550,7 @@ function highestRated($mysqli, $searchTerm) {
 
 }
 
-function highestPolarisation($mysqli, $searchTerm) {
-    // Escape the search term to prevent SQL Injection
-    $searchTerm = $mysqli->real_escape_string($searchTerm);
-
+function highestPolarisation($mysqli) {
     // Base SQL query
     $sql = 
     "WITH RatingStats AS (
@@ -615,10 +600,7 @@ function highestPolarisation($mysqli, $searchTerm) {
 
 }
 
-function IMDBHighest($mysqli, $searchTerm) {
-    // Escape the search term to prevent SQL Injection
-    $searchTerm = $mysqli->real_escape_string($searchTerm);
-
+function IMDBHighest($mysqli) {
     // Base SQL query
     $sql = 
     "SELECT g.genreName, COUNT(mg.movieID) AS movie_count, AVG(m.imdb_rating) AS avg_popularity, SUM(m.imdb_rating_votes) AS number_ratings
@@ -634,10 +616,7 @@ function IMDBHighest($mysqli, $searchTerm) {
     return $result ;
 }
 
-function IMDBMost($mysqli, $searchTerm) {
-    // Escape the search term to prevent SQL Injection
-    $searchTerm = $mysqli->real_escape_string($searchTerm);
-
+function IMDBMost($mysqli) {
     // Base SQL query
     $sql = 
     "SELECT g.genreName, COUNT(mg.movieID) AS movie_count, AVG(m.imdb_rating) AS avg_popularity, SUM(m.imdb_rating_votes) AS number_ratings
@@ -653,10 +632,7 @@ function IMDBMost($mysqli, $searchTerm) {
     return $result ;
 }
 
-function TMDB($mysqli, $searchTerm) {
-    // Escape the search term to prevent SQL Injection
-    $searchTerm = $mysqli->real_escape_string($searchTerm);
-
+function TMDB($mysqli) {
     // Base SQL query
     $sql = 
     "SELECT g.genreName, COUNT(mg.movieID) AS movie_count, AVG(m.tmdb_popularity) AS avg_popularity

@@ -86,6 +86,7 @@ if ($movie_id > 0) {
                    WHERE tg.movieID = $movie_id";
     
     $tags = $mysqli->query($query_tags);
+    $mysqli->close();
 }
 
 
