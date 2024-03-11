@@ -325,7 +325,7 @@
                         LINES TERMINATED BY '\n'
                         IGNORE 1 LINES
                         (rating_userID, agreeableness, emotional_stability, conscientiousness, extraversion,
-                        assigned_metric, assigned_condition, is_persoanlised, enjoy_watching)";
+                        assigned_metric, assigned_condition, is_personalised, enjoy_watching)";
         
         // Execute the SQL statement
         if ($mysqli->query($loadDataSQL) === TRUE) {
@@ -336,11 +336,11 @@
     }
 
     // Loading personality-movie-prediction
-    /**$result = $mysqli->query("SELECT * FROM `personality_movie_prediction` LIMIT 1");
+    $result = $mysqli->query("SELECT * FROM `personality_movie_prediction` LIMIT 1");
     if ($result && $result->num_rows > 0) {
         // echo "Table 'ratings' is not empty. No need to load data.\n";
     } else {
-        $loadDataSQL = "LOAD DATA LOCAL INFILE 'Data/personality-movie-prediction.csv'
+        $loadDataSQL = "LOAD DATA LOCAL INFILE 'Data/personality-movie-predicted-rating.csv'
                         INTO TABLE `personality_movie_prediction`
                         FIELDS TERMINATED BY ','
                         LINES TERMINATED BY '\n'
@@ -353,6 +353,6 @@
         } else {
             echo "Error loading data: " . $mysqli->error;
         }
-    }**/
+    }
 
 ?>

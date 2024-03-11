@@ -137,6 +137,7 @@ require 'database.php';
         <a href="q3.php">Q3</a>
         <a href="q4.php">Q4</a>
         <a href="q5.php"><u>Q5</u></a>
+        <a href="q6.php">Q6</a>
     </div>
     <div class="user-account">
         <?php if (isset($_SESSION['username'])) : ?>

@@ -109,11 +109,12 @@ $all_columns = [
         <h1>Movie Search</h1>
     </header>
     <div class="menu">
-        <a href="index.php"><u>Home</u></a>
+    <a href="index.php"><u>Home</u></a>
         <a href="search.php">Search</a>
         <a href="q3.php">Q3</a>
         <a href="q4.php">Q4</a>
         <a href="q5.php">Q5</a>
+        <a href="q6.php">Q6</a>
     </div>
     <div class="user-account">
         <?php if (isset($_SESSION['username'])) : ?>

@@ -50,9 +50,27 @@ require 'database.php';
         input[type="text"] {
             padding: 10px;
             width: 50%;
-            max-width: 300px;
+            max-width: 70px;
             border: 1px solid #ddd;
             border-radius: 4px;
+        }
+        input[type="number"] {
+            padding: 10px;
+            width: 50%;
+            max-width: 70px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        select {
+            padding: 10px;
+            width: 50%;
+            max-width: 70px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            -webkit-appearance: none; /* Remove default arrow */
+            -moz-appearance: none;
+            appearance: none;
+            background-color: white; /* Reset background color */
         }
         input[type="submit"] {
             background-color: #007bff;
@@ -69,6 +87,69 @@ require 'database.php';
             padding: 20px;
             text-align: center;
         }
+        
+
+        .low {
+        background-color: #008000; /* Choose your desired color */
+        height: 20px;
+        }
+        .mid {
+        background-color: #ffd700; /* Choose your desired color */
+        height: 20px;
+        }
+        .high {
+        background-color: #ff6347; /* Choose your desired color */
+        height: 20px;
+        }
+        .relative-high {
+            background-color: #ff9f4d; /* Color between high (#ff6347) and mid (#ffd700) */
+            height: 20px;
+            mix-blend-mode: multiply;
+        }
+        .relative-low {
+            background-color: #80bf7e; /* Color between mid (#ffd700) and low (#008000) */
+            height: 20px;
+            mix-blend-mode: multiply;
+        }
+        .rating-bar {
+            display: flex;
+            height: 20px; /* Set your desired height */
+            border: 1px solid #000; /* Add border for clarity */
+        }
+
+        .rating-bar div {
+            height: 100%;
+        }
+
+        .toggle-switch {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 10px;
+        }
+        .toggle-switch input[type="radio"] {
+            display: none;
+        }
+        .toggle-switch label {
+            cursor: pointer;
+            padding: 10px 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #f4f4f4;
+            margin: 0 5px;
+            transition: background-color 0.2s ease-in-out;
+        }
+        .toggle-switch label:hover {
+            background-color: #e2e2e2;
+        }
+        .toggle-switch input[type="radio"]:checked + label {
+            -webkit-transition: .4s;
+            background-color: #007bff;
+            color: white;
+        }
+
+
+
     </style>
 </head>
 <body>
@@ -78,12 +159,12 @@ require 'database.php';
         <h1>Movie Search</h1>
     </header>
     <div class="menu">
-    <a href="index.php">Home</a>
-        <a href="search.php"><u>Search</u></a>
+        <a href="index.php">Home</a>
+        <a href="search.php">Search</a>
         <a href="q3.php">Q3</a>
         <a href="q4.php">Q4</a>
         <a href="q5.php">Q5</a>
-        <a href="q6.php">Q6</a>
+        <a href="q6.php"><u>Q6</u></a>
     </div>
     <div class="user-account">
         <?php if (isset($_SESSION['username'])) : ?>
@@ -103,16 +184,33 @@ require 'database.php';
 </div>
 
 <div class="search-container">
-    <form method="get">
-        <input type="text" id="search" name="search" placeholder="Enter movie title..." value="<?php echo isset($_GET['search']) ? $_GET['search'] : ''; ?>" >
-        <input type="submit" value="Search">
+    <form id = "myform" method="post">
+        <div class="toggle-switch">
+            <input id="personality-rating" class="toggle" name="toggle" value="rating" type="radio" <?php echo (isset($_POST['toggle']) && $_POST['toggle'] == 'rating') ? 'checked' : ''; ?>>
+            <label for="personality-rating"><b>Personality Traits & Rating</b></label>
+                
+            <input id="personality-genres" class="toggle" name="toggle" value="genre" type="radio" <?php echo (isset($_POST['toggle']) && $_POST['toggle'] == 'genre') ? 'checked' : ''; ?>>
+            <label for="personality-genres"><b>Personality Traits & Genres</b></label>
+        </div>
+        <input type="submit" value="Submit">
     </form>
 </div>
 
 <div class="results">
+
     <?php
     // Your PHP script for fetching and displaying search results
-    if (isset($_GET['search'])) {
+    if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['toggle'])) {
+
+        $selectedOption = $_POST['toggle'];
+        
+        if ($selectedOption == "rating") {
+            
+        } 
+        
+        if ($selectedOption == "genre") {
+            echo "Genre selected";
+        }
         // Assume $mysqli is already connected
         $search = $_GET['search'];
         $search = "%" . $search . "%";
@@ -219,36 +317,36 @@ require 'database.php';
 
 <?php
 
-function searchMovies($mysqli, $searchTerm) {
-    // Escape the search term to prevent SQL Injection
-    $searchTerm = $mysqli->real_escape_string($searchTerm);
+function getRatingSQL (){
+    $sql = "SELECT p.rating_userID, p.agreeableness, p.emotional_stability, p.conscientiousness, p.extraversion, AVG(r.rating)
+            FROM personality p
+            JOIN ratings r
+            WHERE p.rating_userID = r.rating_userID
+            GROUP BY p.rating_userID;";
+}
 
-    // Base SQL query
-    $sql = "SELECT m.*, ";
-    $sql .= "GROUP_CONCAT(DISTINCT c.name SEPARATOR ', ') AS crew, ";
-    $sql .= "GROUP_CONCAT(DISTINCT co.countryName SEPARATOR ', ') AS countries ";
-    //$sql .= "GROUP_CONCAT(DISTINCT cp.companyName SEPARATOR ', ') AS companies ";
-    $sql .= "FROM movies m ";
-    $sql .= "LEFT JOIN movie_genre mg ON m.movieID = mg.movieID ";
-    $sql .= "LEFT JOIN genre g ON mg.genreID = g.genreID ";
-    $sql .= "LEFT JOIN movie_crew mc ON m.movieID = mc.movieID ";
-    $sql .= "LEFT JOIN crew c ON mc.crewID = c.crewID ";
-    $sql .= "LEFT JOIN movie_countries ct ON m.movieID = ct.movieID ";
-    $sql .= "LEFT JOIN production_countries co ON ct.countryID = co.countryID ";
-    $sql .= "LEFT JOIN movie_production_companies mpc ON m.movieID = mpc.movieID ";
-    $sql .= "LEFT JOIN production_companies cp ON mpc.companyID = cp.companyID ";
-    $sql .= "WHERE m.title LIKE '$searchTerm' OR ";
-    $sql .= "c.name LIKE '$searchTerm' OR ";
-    $sql .= "g.genreName LIKE '$searchTerm' OR ";
-    $sql .= "co.countryName LIKE '$searchTerm' OR ";
-    $sql .= "m.release_year LIKE '$searchTerm' OR ";
-    $sql .= "cp.companyName LIKE '$searchTerm' ";
-    $sql .= "GROUP BY m.movieID";
+function pearsonCorrelation($xs, $ys) {
+    $n = count($xs);
+    $meanX = array_sum($xs) / $n;
+    $meanY = array_sum($ys) / $n;
 
-    // Execute the query
-    $result = $mysqli->query($sql);
+    $numerator = 0;
+    $denominatorX = 0;
+    $denominatorY = 0;
 
-    return $result ;
+    for ($i = 0; $i < $n; $i++) {
+        $numerator += ($xs[$i] - $meanX) * ($ys[$i] - $meanY);
+        $denominatorX += pow($xs[$i] - $meanX, 2);
+        $denominatorY += pow($ys[$i] - $meanY, 2);
+    }
+
+    if ($denominatorX == 0 || $denominatorY == 0) {
+        return 0;
+    }
+
+    $denominator = sqrt($denominatorX) * sqrt($denominatorY);
+
+    return $numerator / $denominator;
 }
 ?>
 
