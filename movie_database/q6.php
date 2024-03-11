@@ -205,110 +205,40 @@ require 'database.php';
         $selectedOption = $_POST['toggle'];
         
         if ($selectedOption == "rating") {
+            $agreeablenessScores = [];
+            $emotionalStabilityScores = [];
+            $conscientiousnessScores = [];
+            $extraversionScores = [];
+            $averageRatings = [];
+
+            $result = getHighRatingSQL($mysqli);
+
+            while ($row = $result->fetch_assoc()) {
+                $agreeablenessScores[] = $row['agreeableness'];
+                $emotionalStabilityScores[] = $row['emotional_stability'];
+                $conscientiousnessScores[] = $row['conscientiousness'];
+                $extraversionScores[] = $row['extraversion'];
+                $averageRatings[] = $row['rating'];
+            }
+            
+            $agreeablenessCorrelation = pearsonCorrelation($agreeablenessScores, $averageRatings);
+            $emotionalStabilityScoresCorrelation = pearsonCorrelation($emotionalStabilityScores, $averageRatings);
+            $conscientiousnessScoresCorrelation = pearsonCorrelation($conscientiousnessScores, $averageRatings);
+            $extraversionScoresCorrelation = pearsonCorrelation($extraversionScores, $averageRatings);
+            echo "<b>Agreeableness correlation:</b> " . $agreeablenessCorrelation . "<br>";
+            echo "<b>Emotional Stability correlation:</b> " . $emotionalStabilityScoresCorrelation . "<br>";
+            echo "<b>Conscientiousness correlation:</b> " . $conscientiousnessScoresCorrelation . "<br>";
+            echo "<b>Extraversion correlation:</b> " . $extraversionScoresCorrelation . "<br>";
+
             
         } 
         
         if ($selectedOption == "genre") {
             echo "Genre selected";
         }
-        // Assume $mysqli is already connected
-        $search = $_GET['search'];
-        $search = "%" . $search . "%";
-        $result = searchMovies($mysqli, $search);
-        //$query = "SELECT * FROM movies WHERE title LIKE $search";
-        //$result = $mysqli->query($query);
-
-        if ($result) {
-            // Start the table and optionally add a border for visibility
-            echo "<p>" . mysqli_num_rows($result) . " Results</p>" ;
-            echo "<style>\n";
-            echo "body { font-family: Arial, sans-serif; }\n";
-            echo ".container {
-                width: 100%;
-                padding: 20px;
-                box-sizing: border-box;
-            }\n";
-            echo "table { width: 100%; border-collapse: collapse; table-layout: fixed; }\n";
-            echo "th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }\n";
-            echo "th { background-color: #0096FF; color: white; }\n";
-            echo "tr:nth-child(even) { background-color: #f2f2f2 }\n";
-            echo "tr:hover { background-color: #ddd; }\n";
-            echo "a { color: #333; text-decoration: none; }\n";
-            echo "a:hover { text-decoration: underline; }\n";
-            echo "</style>\n";
-            echo "<table>"; 
-            echo "<table border='0'>"; 
-            // Table headers
-            echo "<tr> <th> </th> <th>Title</th> <th>Year</th> <th>Original Language</th> <th>Runtime</th> <th>Overview</th> <th>TMDB Popularity</th> <th>IMDB Rating</th> </tr>";
-            while ($row = $result->fetch_assoc()) {
-                $title = htmlspecialchars($row['title']);
-                $year = htmlspecialchars($row['release_year']);
-                if ($row['original_language'] !== null) {
-                    $original_language = htmlspecialchars($row['original_language']);
-                } else {
-                    $original_language = null;
-                }
-                if ($row['runtime'] !== null) {
-                    $runtime = htmlspecialchars($row['runtime']);
-                } else {
-                    $runtime = null;
-                }
-                $overview = htmlspecialchars($row['overview']);
-                $overview = strlen($overview) > 200 ? substr($overview, 0, 200) . "..." : $overview;
-                $poster_URL = htmlspecialchars($row['poster_URL']);
-                if ($row['box_office'] !== null) {
-                    $box_office = htmlspecialchars($row['box_office']);
-                } else {
-                    $box_office = null;
-                }
-                if ($row['budget'] !== null) {
-                    $budget = htmlspecialchars($row['budget']);
-                } else {
-                    $budget = null;
-                }
-                if ($row['tmdb_popularity'] !== null) {
-                    $tmdb_popularity = htmlspecialchars($row['tmdb_popularity']);
-                } else {
-                    $tmdb_popularity = null;
-                }
-                if ($row['imdb_rating'] !== null) {
-                    $imdb_rating = htmlspecialchars($row['imdb_rating']);
-                } else {
-                    $imdb_rating = null;
-                }
-                echo "<tr>"; // Start a new row for each record
-                echo "<td>" . "<img src='$poster_URL' alt='poster' width='150' height='225'>" . "</td>" ;
-                echo "<td><a href='movie_details.php?id=" . $row["movieID"] . "' target='_blank'><b>" . $title . "</b></a></td>\n"; 
-                echo "<td>" . $year . "</td>";
-                if ($original_language !== null) {
-                    echo "<td>" . $original_language . "</td>";
-                } else {
-                    echo "<td> N/A </td>";
-                }
-                if ($runtime !== null) {
-                    echo "<td>" . $runtime . "</td>";
-                } else {
-                    echo "<td> N/A </td>";
-                }
-                echo "<td>" . $overview . "</td>";
-                if ($tmdb_popularity !== null) {
-                    echo "<td>" . $tmdb_popularity . "</td>";
-                } else {
-                    echo "<td> N/A </td>";
-                }
-                if ($imdb_rating !== null) {
-                    echo "<td>" . $imdb_rating . "</td>";
-                } else {
-                    echo "<td> N/A </td>";
-                }
-                echo "</tr>";
-            }
-            
-            echo "</table>";
-        } else {
-            echo "Query failed: " . $mysqli->error;
-        }
     }
+
+        
     ?>
 </div>
 
@@ -317,13 +247,20 @@ require 'database.php';
 
 <?php
 
-function getRatingSQL (){
-    $sql = "SELECT p.rating_userID, p.agreeableness, p.emotional_stability, p.conscientiousness, p.extraversion, AVG(r.rating)
+function getHighRatingSQL ($mysqli){
+    $sql = "SELECT p.rating_userID, p.agreeableness, p.emotional_stability, p.conscientiousness, p.extraversion, AVG(r.rating) as rating
             FROM personality p
             JOIN ratings r
             WHERE p.rating_userID = r.rating_userID
+            AND (rating >= 4 OR rating <= 2)
             GROUP BY p.rating_userID;";
+            
+
+    $result = $mysqli->query($sql);
+
+    return $result;
 }
+
 
 function pearsonCorrelation($xs, $ys) {
     $n = count($xs);
