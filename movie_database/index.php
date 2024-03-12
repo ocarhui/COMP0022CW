@@ -233,7 +233,7 @@ $mysqli->close();
         // Display checkboxes for each movie attribute
         foreach ($all_columns as $key => $value) {
             $checked = isset($_POST['selected_columns']) && in_array($key, $_POST['selected_columns']) ? 'checked' : '';
-            echo "<label class='checkbox-container'><b>$value</b>
+            echo "<label class='checkbox-container'>$value
             <input type='checkbox' name='selected_columns[]' value='$key' $checked>
             <span class='checkmark'></span>
             </label>";
