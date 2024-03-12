@@ -4,11 +4,14 @@ session_start();
 
 require 'setup_database.php';
 
+function sanitize($input) {
+    global $mysqli;
+    return mysqli_real_escape_string($mysqli, htmlspecialchars(strip_tags($input)));
+}
 
 // Retrieve movie_id from the URL query string
 $movie_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 
-// Initialize an array to store the movie details
 $movie_details = [];
 $genres = [];
 $actors = null;
@@ -20,26 +23,25 @@ $tags = null;
 
 // Fetch movie details if a valid movie_id is provided
 if ($movie_id > 0) {
-
     $query_movies = "SELECT m.*
                      FROM movies m
-                     WHERE m.movieID = $movie_id";
-
-
-    $result = $mysqli->query($query_movies);
-    
-
+                     WHERE m.movieID = ?";
+    $stmt = $mysqli->prepare($query_movies);
+    $stmt->bind_param("i", $movie_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
     if ($row = $result->fetch_assoc()) {
-            $movie_details = $row;
+        $movie_details = $row;
     }
 
     $query_genres = "SELECT g.genreName
                      FROM genre g
                      JOIN movie_genre mg ON g.genreID = mg.genreID
-                     WHERE mg.movieID = $movie_id";
-    
-    $result = $mysqli->query($query_genres);
-
+                     WHERE mg.movieID = ?";
+    $stmt = $mysqli->prepare($query_genres);
+    $stmt->bind_param("i", $movie_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
     while ($row = $result->fetch_assoc()) {
         $genres[] = $row['genreName'];
     }
@@ -47,51 +49,60 @@ if ($movie_id > 0) {
     $query_actors = "SELECT c.name, mc.characters
                      FROM crew c
                      LEFT JOIN movie_crew mc ON c.crewID = mc.crewID
-                     WHERE mc.movieID = $movie_id
-                     AND (mc.occupationID = 1
-                     OR mc.occupationID = 4)" ;
-    
-    $actors = $mysqli->query($query_actors);
+                     WHERE mc.movieID = ? AND (mc.occupationID = 1 OR mc.occupationID = 4)";
+    $stmt = $mysqli->prepare($query_actors);
+    $stmt->bind_param("i", $movie_id);
+    $stmt->execute();
+    $actors = $stmt->get_result();
 
     $query_director = "SELECT c.name, mc.characters
-                     FROM crew c
-                     LEFT JOIN movie_crew mc ON c.crewID = mc.crewID
-                     WHERE mc.movieID = $movie_id
-                     AND mc.occupationID = 2" ;
-    
-    $directors = $mysqli->query($query_director);
+                       FROM crew c
+                       LEFT JOIN movie_crew mc ON c.crewID = mc.crewID
+                       WHERE mc.movieID = ? AND mc.occupationID = 2";
+    $stmt = $mysqli->prepare($query_director);
+    $stmt->bind_param("i", $movie_id);
+    $stmt->execute();
+    $directors = $stmt->get_result();
 
     $query_companies = "SELECT cp.companyName
                         FROM production_companies cp
                         LEFT JOIN movie_production_companies mpc ON cp.companyID = mpc.companyID
-                        WHERE mpc.movieID = $movie_id";
-    $companies = $mysqli->query($query_companies);
+                        WHERE mpc.movieID = ?";
+    $stmt = $mysqli->prepare($query_companies);
+    $stmt->bind_param("i", $movie_id);
+    $stmt->execute();
+    $companies = $stmt->get_result();
 
     $query_countries = "SELECT pc.countryName
                         FROM production_countries pc
                         LEFT JOIN movie_countries mc ON pc.countryID = mc.countryID
-                        WHERE mc.movieID = $movie_id";
-
-    $countries = $mysqli->query($query_countries);
+                        WHERE mc.movieID = ?";
+    $stmt = $mysqli->prepare($query_countries);
+    $stmt->bind_param("i", $movie_id);
+    $stmt->execute();
+    $countries = $stmt->get_result();
 
     $query_ratings = "SELECT rt.rating
                       FROM ratings rt
-                      WHERE rt.movieID = $movie_id";
-
-    $initial_ratings = $mysqli->query($query_ratings);
+                      WHERE rt.movieID = ?";
+    $stmt = $mysqli->prepare($query_ratings);
+    $stmt->bind_param("i", $movie_id);
+    $stmt->execute();
+    $initial_ratings = $stmt->get_result();
 
     $query_tags = "SELECT t.tag
                    FROM tags t
                    LEFT JOIN movie_tags tg ON t.tagID = tg.tagID
-                   WHERE tg.movieID = $movie_id";
-    
-    $tags = $mysqli->query($query_tags);
+                   WHERE tg.movieID = ?";
+    $stmt = $mysqli->prepare($query_tags);
+    $stmt->bind_param("i", $movie_id);
+    $stmt->execute();
+    $tags = $stmt->get_result();
+
     $mysqli->close();
 }
-
-
-
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -164,6 +175,19 @@ if ($movie_id > 0) {
     </style>
 </head>
 <body>
+    <?php
+        function displayHistory() {
+            if(isset($_SERVER['HTTP_REFERER'])) {
+                $historyArray = explode(';', $_SERVER['HTTP_REFERER']);
+                if(empty($historyArray)) {
+                    die("To access the movie detail page, Please use Home Page or Search Page");
+                }
+            } else {
+                die("To access the movie detail page, Please use Home Page or Search Page");
+            }
+        }
+        displayHistory();
+    ?>
     <div class="navbar">
         <header>
             <h1>Movie Search</h1>

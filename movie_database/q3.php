@@ -149,7 +149,7 @@ session_start();
             <input type="submit" name="IMDBHighest" value="Highest Rated">
             <!-- SPACE --> &#160&#160&#160
             TMDB:
-            <input type="submit" name="TMDB" value="Highest Rated">
+            <input type="submit" name="TMDB" value="Highest Popularity">
         </h3>
     </form>
 </div>
@@ -508,7 +508,6 @@ function mostRated($mysqli) {
 
     // Execute the query
     $result = $mysqli->query($sql);
-
     return $result ;
 }
 

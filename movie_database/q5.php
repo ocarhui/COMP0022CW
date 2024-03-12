@@ -160,7 +160,7 @@ session_start();
         Reaction of top
         <input type="number" id="one_sample_percentage" name="one_sample_percentage" placeholder="30" value="<?php echo isset($_POST['one_sample_percentage']) ? $_POST['one_sample_percentage'] : ''; ?>" min="0" max="100">
         % active users to movie 
-        <input type="text" id="movie" name="movie" placeholder="Movie ID..." value="<?php echo isset($_POST['movie']) ? $_POST['movie'] : ''; ?>" required>
+        <input type="text" id="movie" name="movie" placeholder="Movie Title..." value="<?php echo isset($_POST['movie']) ? $_POST['movie'] : ''; ?>" required>
         <input type="submit" name="MovieID" value="Submit">
         </h3>
     </form>

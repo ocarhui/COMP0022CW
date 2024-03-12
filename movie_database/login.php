@@ -9,6 +9,26 @@ $error = isset($_GET['error']) ? $_GET['error'] : '';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
+    <style>
+        .bottom-sentence {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px; /* Smaller font size */
+        }
+
+        .bottom-sentence a {
+            color: #333;
+            text-decoration: none;
+        }
+
+        .bottom-sentence a:hover {
+            text-decoration: underline;
+        }
+    </style>
     <link rel="stylesheet" href="css/login.css">
 </head>
 <body>
@@ -28,5 +48,10 @@ $error = isset($_GET['error']) ? $_GET['error'] : '';
             <input type="submit" name="submit" value="Login">
         </form>
     </div>
+
+    <div class="bottom-sentence">
+    Made with LOVE by <a href="mailto:junzhang.li.21@ucl.ac.uk"><span style="font-weight: bold;">Group 8</span></a>
+    </div>
+
 </body>
 </html>

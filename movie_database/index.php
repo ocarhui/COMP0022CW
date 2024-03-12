@@ -246,6 +246,7 @@ $mysqli->close();
     // Your PHP script for fetching and displaying filter results
     if ($select_part === 'null' || empty($selected_columns)) {
         echo "<h3>Please select film information to display</h3>";
+        echo "<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>";
     } elseif ($result && $result->num_rows > 0) {
         // Start the table and optionally add a border for visibility
         echo "<p>" . mysqli_num_rows($result) . " Results</p>" ;

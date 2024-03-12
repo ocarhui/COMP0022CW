@@ -214,30 +214,21 @@ session_start();
             echo "<table border='0'>";
 
             // Table headers
-            echo "<tr> <th>Number of Viewers</th> <th>Number of Ratings</th> <th>Average Rating</th> <th>High Rating Viewer Number</th> <th>Moderate Rating Viewer Number</th> <th>Low Rating Viewer Number</th> </tr>";
+            echo "<tr> <th>Movie</th> <th>Number of Viewers</th> <th>Average Rating</th> <th>High Rating Viewer Number</th> <th>Moderate Rating Viewer Number</th> <th>Low Rating Viewer Number</th> </tr>";
 
-            $count = mysqli_num_rows($result);
-            $total = 0;
-            $high = 0;
-            $mid = 0;
-            $low = 0;
             // Table contents
-            while ($row = $result->fetch_assoc()) {
-                $total += $row['rating_for_chosen_movie'];
-                switch(true) {
-                    case ($row['rating_for_chosen_movie'] < 2.5):
-                        $low += 1;
-                        break;
-                    case ($row['rating_for_chosen_movie'] >= 3.5):
-                        $high += 1;
-                        break;
-                    default:
-                        $mid += 1;
-                        break;
-                  }                  
-            }
+            $row = $result->fetch_assoc();
+            $title = $_POST['movie'];
+            $movieID = $row['movieID'];
+            $count = $row['total_rating'];
+            $average = $row['average_rating'];
+            $high = $row['high'];
+            $low = $row['low'];
+            $mid = $count - $high - $low;
+
             echo "<tr>";
-            echo "<td>" . $count . "</td><td>" . $count . "</td><td>" . round($total / $count, 2) . "</td>";
+            echo "<td><a href='movie_details.php?id=" . $movieID . "' target='_blank'><b>" . $title . "</b></a></td>";
+            echo "<td>" . $count . "</td><td>" . round($average, 2) . "</td>";
             echo '<td><div class="high" style="width: ' . $high/$count*100 . '%;"></div>' . round($high*100/$count, 2) . '% ('. $high .')</td>';
             echo '<td><div class="mid" style="width: ' . $mid/$count*100 . '%;"></div>' . round($mid*100/$count, 2) . '% ('. $mid .')</td>';
             echo '<td><div class="low" style="width: ' . $low/$count*100 . '%;"></div>' . round($low*100/$count, 2) . '% ('. $low .')</td>';
@@ -293,33 +284,19 @@ session_start();
             // Table headers
             echo "<tr> <th>Number of Viewers</th> <th>Number of Ratings</th> <th>Average Rating</th> <th>High Rating Viewer Number</th> <th>Moderate Rating Viewer Number</th> <th>Low Rating Viewer Number</th> </tr>";
 
-            $numviewer = mysqli_num_rows($result);
-            $count = 0;
-            $total = 0;
-            $high = 0;
-            $mid = 0;
-            $low = 0;
-            // Table contents
-            while ($row = $result->fetch_assoc()) {
-                $count += $row['rating_genre_count'];
-                $total += $row['rating_genre_count'] * $row['avg_rating_genre'];
-                switch(true) {
-                    case ($row['avg_rating_genre'] < 2.5):
-                        $low += 1;
-                        break;
-                    case ($row['avg_rating_genre'] >= 3.5):
-                        $high += 1;
-                        break;
-                    default:
-                        $mid += 1;
-                        break;
-                  }                  
-            }
+            $row = $result->fetch_assoc();
+            $total_viewers = $row['total_viewers'];
+            $total_ratings = $row['total_ratings'];
+            $average_rating = $row['average_rating'];
+            $high = $row['high'];
+            $low = $row['low'];
+            $mid = $total_viewers - $high - $low;
+
             echo "<tr>";
-            echo "<td>" . $numviewer . "</td><td>" . $count . "</td><td>" . round($total / $count, 2) . "</td>";
-            echo '<td><div class="high" style="width: ' . $high/$numviewer*100 . '%;"></div>' . round($high*100/$numviewer, 2) . '% ('. $high .')</td>';
-            echo '<td><div class="mid" style="width: ' . $mid/$numviewer*100 . '%;"></div>' . round($mid*100/$numviewer, 2) . '% ('. $mid .')</td>';
-            echo '<td><div class="low" style="width: ' . $low/$numviewer*100 . '%;"></div>' . round($low*100/$numviewer, 2) . '% ('. $low .')</td>';
+            echo "<td>" . $total_viewers . "</td><td>" . $total_ratings . "</td><td>" . round($average_rating, 2) . "</td>";
+            echo '<td><div class="high" style="width: ' . $high/$total_viewers*100 . '%;"></div>' . round($high*100/$total_viewers, 2) . '% ('. $high .')</td>';
+            echo '<td><div class="mid" style="width: ' . $mid/$total_viewers*100 . '%;"></div>' . round($mid*100/$total_viewers, 2) . '% ('. $mid .')</td>';
+            echo '<td><div class="low" style="width: ' . $low/$total_viewers*100 . '%;"></div>' . round($low*100/$total_viewers, 2) . '% ('. $low .')</td>';
             echo "</tr>";
             echo "</table>";
             $result->free();
@@ -339,25 +316,35 @@ session_start();
 
 function movieReaction($mysqli, $movie, $upper, $lower) {
     $sql = 
-    "SELECT 
-        t1.rating_userID,
-        (
-            SELECT t2.rating 
-            FROM ratings t2 
-            WHERE t2.rating_userID = t1.rating_userID AND t2.movieID = ? 
-            LIMIT 1
-        ) AS rating_for_chosen_movie
-    FROM 
-        ratings t1
-    GROUP BY 
-        t1.rating_userID
-    HAVING 
-        AVG(t1.rating) <= ? AND AVG(t1.rating) >= ? 
-        AND rating_for_chosen_movie IS NOT NULL";
+    "SELECT
+        movieID,
+        COUNT(*) AS total_rating,
+        AVG(rating_for_chosen_movie) AS average_rating,
+        SUM(CASE WHEN rating_for_chosen_movie >= 3.5 THEN 1 ELSE 0 END) AS high,
+        SUM(CASE WHEN rating_for_chosen_movie < 2.5 THEN 1 ELSE 0 END) AS low
+    FROM (
+        SELECT 
+            t1.rating_userID,
+            (
+                SELECT t2.rating 
+                FROM ratings t2 
+                WHERE t2.rating_userID = t1.rating_userID AND t2.movieID = (SELECT movieID FROM movies WHERE title = ?)
+                LIMIT 1
+            ) AS rating_for_chosen_movie,
+            (SELECT movieID FROM movies WHERE title = ?) AS movieID
+        FROM 
+            ratings t1
+        GROUP BY 
+            t1.rating_userID
+        HAVING 
+            AVG(t1.rating) <= ? AND AVG(t1.rating) >= ?
+            AND rating_for_chosen_movie IS NOT NULL
+    ) AS subquery
+    GROUP BY movieID;";
 
     // Prepare the statement
     if ($stmt = $mysqli->prepare($sql)) {
-        $stmt->bind_param("idd", $movie, $upper, $lower);
+        $stmt->bind_param("ssdd", $movie, $movie, $upper, $lower);
         $stmt->execute();
         $result = $stmt->get_result();
         $stmt->close();
@@ -376,7 +363,6 @@ function genreReaction($mysqli, $target_genre, $origin_genre, $genre_upper, $gen
             r.rating_userID
         FROM 
              ratings r
-            -- ratings r
         JOIN 
             movie_genre mg ON r.movieID = mg.movieID
         JOIN 
@@ -389,34 +375,35 @@ function genreReaction($mysqli, $target_genre, $origin_genre, $genre_upper, $gen
             AVG(r.rating) <= ? AND AVG(r.rating) >= ?
     )
     SELECT 
-        c.rating_userID,
-        a.avg_rating_genre,
-        a.rating_genre_count
+        COUNT(*) AS total_viewers,
+        SUM(a.rating_genre_count) AS total_ratings,
+        COUNT(CASE WHEN a.avg_rating_genre >= 3.5 THEN 1 END) AS high,
+        COUNT(CASE WHEN a.avg_rating_genre < 2.5 THEN 1 END) AS low,
+        (SUM(a.avg_rating_genre * a.rating_genre_count) / SUM(a.rating_genre_count)) AS average_rating
     FROM 
         OriginGenreRatings c
     JOIN 
         (SELECT 
-             r.rating_userID,
+            r.rating_userID,
              AVG(r.rating) AS avg_rating_genre,
-             COUNT(r.rating) AS rating_genre_count
-         FROM 
-              ratings r
-            --  ratings r
-         JOIN 
-             movie_genre mg ON r.movieID = mg.movieID
-         JOIN 
-             genre g ON mg.genreID = g.genreID
-         WHERE 
-             g.genreName = ?
-         AND
-             r.rating_userID IN (SELECT rating_userID FROM OriginGenreRatings)
-         GROUP BY 
-             r.rating_userID) a
+            COUNT(r.rating) AS rating_genre_count
+        FROM 
+            ratings r
+        JOIN 
+            movie_genre mg ON r.movieID = mg.movieID
+        JOIN 
+            genre g ON mg.genreID = g.genreID
+        WHERE 
+            g.genreName = ?
+        AND
+            r.rating_userID IN (SELECT rating_userID FROM OriginGenreRatings)
+        GROUP BY 
+            r.rating_userID) a
     ON 
         c.rating_userID = a.rating_userID;";
 
     $stmt = $mysqli->prepare($sql);
-    $stmt->bind_param("ssii", $origin_genre, $genre_upper, $genre_lower, $target_genre);
+    $stmt->bind_param("sdds", $origin_genre, $genre_upper, $genre_lower, $target_genre);
     $stmt->execute();
     $result = $stmt->get_result();
     $stmt->close();

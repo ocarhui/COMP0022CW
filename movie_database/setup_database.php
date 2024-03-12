@@ -307,11 +307,12 @@
                         (rating_userID, movieID, rating, timestamp)";
         
         // Execute the SQL statement
-        if ($mysqli->query($loadDataSQL) === TRUE) {
-            // echo "ratings.csv loaded successfully.\n";
-        } else {
-            echo "Error loading data: " . $mysqli->error;
-        }
+        $mysqli->query($loadDataSQL);
+        // if ($mysqli->query($loadDataSQL) === TRUE) {
+        //     // echo "ratings.csv loaded successfully.\n";
+        // } else {
+        //     echo "Error loading data: " . $mysqli->error;
+        // }
     }
 
 ?>
