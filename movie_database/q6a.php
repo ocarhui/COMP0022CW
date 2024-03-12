@@ -147,9 +147,11 @@ require 'database.php';
             background-color: #007bff;
             color: white;
         }
-
-
-
+        select {
+            width: 2000px; /* Set a width that fits your content */
+            padding: 5px; /* Add some padding for visual comfort */
+            margin-right: 10px; /* Add some space between the dropdown and the next element */
+        }
     </style>
 </head>
 <body>
@@ -164,7 +166,8 @@ require 'database.php';
         <a href="q3.php">Q3</a>
         <a href="q4.php">Q4</a>
         <a href="q5.php">Q5</a>
-        <a href="q6.php"><u>Q6</u></a>
+        <a href="q6a.php"><u>Personality Traits & Rating Correlation</u></a>
+        <a href="q6b.php">Personality Traits & Genres Correlation</a>
     </div>
     <div class="user-account">
         <?php if (isset($_SESSION['username'])) : ?>
@@ -184,58 +187,74 @@ require 'database.php';
 </div>
 
 <div class="search-container">
-    <form id = "myform" method="post">
-        <div class="toggle-switch">
-            <input id="personality-rating" class="toggle" name="toggle" value="rating" type="radio" <?php echo (isset($_POST['toggle']) && $_POST['toggle'] == 'rating') ? 'checked' : ''; ?>>
-            <label for="personality-rating"><b>Personality Traits & Rating</b></label>
+    <form id="rating" method="post">
+        <b> Correlation between </b>
+
+        <label for="personalityTraits"><b>Personality Traits:</b></label>
+        <select id="personalityTraits" name="personalityTraits" style="width: 100%; max-width: 150px;">
+        <option value="agreeableness">Agreeableness</option>
+        <option value="emotional_stability">Emotional Stability</option>
+        <option value="conscientiousness">Conscientiousness</option>
+        <option value="extraversion">Extraversion</option>
+        </select>
+        
+        <select id="greaterSmaller" name="greaterSmaller" style="width: 100%; max-width: 30px;">
+        <option value="<="><=</option>
+        <option value=">=">>=</option>
+        </select>
+        
+        <select id="personalityTraitsValue" name="personalityTraitsValue" style="width: 100%; max-width: 20px;">
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+        </select>
+
+        <b> and </b>
                 
-            <input id="personality-genres" class="toggle" name="toggle" value="genre" type="radio" <?php echo (isset($_POST['toggle']) && $_POST['toggle'] == 'genre') ? 'checked' : ''; ?>>
-            <label for="personality-genres"><b>Personality Traits & Genres</b></label>
-        </div>
+        <label for="rating"><b>Rating:</b></label>
+        <select id="rating" name="rating" style="width: 100%; max-width: 150px;">
+        <option value="high">High</option>
+        <option value="low">Low</option>
+        </select>
+                
         <input type="submit" value="Submit">
+
     </form>
 </div>
 
 <div class="results">
+    
 
     <?php
     // Your PHP script for fetching and displaying search results
-    if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['toggle'])) {
+    if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['rating'])) {
 
-        $selectedOption = $_POST['toggle'];
-        
-        if ($selectedOption == "rating") {
-            $agreeablenessScores = [];
-            $emotionalStabilityScores = [];
-            $conscientiousnessScores = [];
-            $extraversionScores = [];
-            $averageRatings = [];
+        if (!empty($_POST['personalityTraits']) && !empty($_POST['rating'])) {
 
-            $result = getHighRatingSQL($mysqli);
-
-            while ($row = $result->fetch_assoc()) {
-                $agreeablenessScores[] = $row['agreeableness'];
-                $emotionalStabilityScores[] = $row['emotional_stability'];
-                $conscientiousnessScores[] = $row['conscientiousness'];
-                $extraversionScores[] = $row['extraversion'];
-                $averageRatings[] = $row['rating'];
+            $personalityTrait = $_POST['personalityTraits'];
+            $rating = null;
+            $greaterSmaller = $_POST['greaterSmaller'];
+            $personalityTraitsValue = $_POST['personalityTraitsValue'];
+                        
+            if ($_POST['rating'] == "high") {
+                $rating = ">= 4";
+            } else {
+                $rating = "<= 2";
             }
-            
-            $agreeablenessCorrelation = pearsonCorrelation($agreeablenessScores, $averageRatings);
-            $emotionalStabilityScoresCorrelation = pearsonCorrelation($emotionalStabilityScores, $averageRatings);
-            $conscientiousnessScoresCorrelation = pearsonCorrelation($conscientiousnessScores, $averageRatings);
-            $extraversionScoresCorrelation = pearsonCorrelation($extraversionScores, $averageRatings);
-            echo "<b>Agreeableness correlation:</b> " . $agreeablenessCorrelation . "<br>";
-            echo "<b>Emotional Stability correlation:</b> " . $emotionalStabilityScoresCorrelation . "<br>";
-            echo "<b>Conscientiousness correlation:</b> " . $conscientiousnessScoresCorrelation . "<br>";
-            echo "<b>Extraversion correlation:</b> " . $extraversionScoresCorrelation . "<br>";
-
-            
-        } 
-        
-        if ($selectedOption == "genre") {
-            echo "Genre selected";
+                        
+            $result = getRatingSQL($mysqli, $personalityTrait, $greaterSmaller, $personalityTraitsValue, $rating);
+    
+            while ($row = $result->fetch_assoc()) {
+                $personalityTraitScore[] = $row[$personalityTrait];
+                $ratingScore[] = $row['rating'];
+            }
+    
+            $correlation = pearsonCorrelation($personalityTraitScore, $ratingScore);
+            echo "<b>Correlation:</b> " . $correlation . "<br>";
         }
+
     }
 
         
@@ -247,12 +266,14 @@ require 'database.php';
 
 <?php
 
-function getHighRatingSQL ($mysqli){
-    $sql = "SELECT p.rating_userID, p.agreeableness, p.emotional_stability, p.conscientiousness, p.extraversion, AVG(r.rating) as rating
+function getRatingSQL ($mysqli, $personalityTrait, $greaterSmaller, $personalityTraitsValue, $rating){
+    $personalityTrait = "p." . $personalityTrait;
+    $sql = "SELECT p.rating_userID, $personalityTrait, AVG(r.rating) as rating
             FROM personality p
             JOIN ratings r
             WHERE p.rating_userID = r.rating_userID
-            AND (rating >= 4 OR rating <= 2)
+            AND rating $rating
+            AND $personalityTrait $greaterSmaller $personalityTraitsValue
             GROUP BY p.rating_userID;";
             
 
@@ -260,6 +281,67 @@ function getHighRatingSQL ($mysqli){
 
     return $result;
 }
+
+function getGenresSQL ($mysqli){
+    $sql = "WITH UserGenreAverage AS (
+            SELECT
+                rating_userID,
+                genreID,
+                AVG(rating) AS avg_rating
+            FROM
+                ratings r
+            INNER JOIN
+                movie_genre mg ON r.movieID = mg.movieID
+            GROUP BY
+                rating_userID, genreID
+        ), MaxUserGenreAverage AS (
+            SELECT
+                rating_userID,
+                MAX(avg_rating) AS max_average_rating
+            FROM
+                UserGenreAverage
+            GROUP BY
+                rating_userID
+        ), FinalRatings AS (
+            SELECT
+                uga.rating_userID,
+                uga.genreID,
+                uga.avg_rating AS average_rating,
+                COUNT(r.rating) AS rating_count
+            FROM
+                UserGenreAverage uga
+            INNER JOIN
+                ratings r ON uga.rating_userID = r.rating_userID
+            INNER JOIN
+                movie_genre mg ON r.movieID = mg.movieID AND uga.genreID = mg.genreID
+            INNER JOIN
+                MaxUserGenreAverage muga ON uga.rating_userID = muga.rating_userID AND uga.avg_rating = muga.max_average_rating
+            GROUP BY
+                uga.rating_userID, uga.genreID, uga.avg_rating
+        )
+        SELECT
+            p.rating_userID,
+            p.agreeableness,
+            p.emotional_stability,
+            p.conscientiousness,
+            p.extraversion,
+            g.genreName,
+            fr.average_rating,
+            fr.rating_count
+        FROM
+            FinalRatings fr
+        INNER JOIN
+            personality p ON fr.rating_userID = p.rating_userID
+        INNER JOIN
+            genre g ON fr.genreID = g.genreID
+        ORDER BY
+            fr.rating_userID, fr.average_rating DESC, fr.rating_count DESC;";
+            
+
+    $result = $mysqli->query($sql);
+
+    return $result;
+} 
 
 
 function pearsonCorrelation($xs, $ys) {
