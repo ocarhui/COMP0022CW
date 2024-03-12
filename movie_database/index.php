@@ -2,12 +2,11 @@
 session_start();
 
 require 'setup_database.php';
-require 'database.php'; 
 
 // Define all available columns
 $all_columns = [
     'poster_URL' => 'Poster',
-    'MovieID' => 'Movie ID',
+    // 'MovieID' => 'Movie ID',
     'Title' => 'Title',
     'release_year' => 'Year',
     'original_language' => 'Original Language',
@@ -21,8 +20,21 @@ $all_columns = [
     'genre' => 'Genre'
 ];
 
-// Fetch distinct countries from the database
+$sql = "SELECT COUNT(*) AS total FROM movies";
+$result = $mysqli -> query($sql);
+
+if ($result) {
+    $row = $result->fetch_assoc();
+    $entry = $row['total'];
+    $result->free();
+}
+
+$perPage = 25;
+$total_page = intdiv($entry, $perPage) + 1;
+$offset = 0;
+$mysqli->close();
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -81,12 +93,22 @@ $all_columns = [
         input[type="submit"]:hover {
             background-color: #0056b3;
         }
+        select {
+            padding: 10px;
+            width: 50%;
+            max-width: 70px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            -webkit-appearance: none; /* Remove default arrow */
+            -moz-appearance: none;
+            appearance: none;
+            background-color: white; /* Reset background color */
+        }
         .results {
             padding: 20px;
             text-align: center;
         }
 
-        /* Add these styles */
         button[type="button"] {
             background-color: #007bff;
             color: white;
@@ -100,6 +122,76 @@ $all_columns = [
         button[type="button"]:hover {
             background-color: #0056b3;
         }
+        .checkbox-container {
+            display: inline-block;
+            position: relative;
+            padding-left: 35px;
+            margin-right: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            user-select: none;
+            -webkit-user-select: none; /* Safari */
+            -moz-user-select: none; /* Firefox */
+            -ms-user-select: none; /* IE10+/Edge */
+        }
+
+        .checkbox-container input {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            height: 0;
+            width: 0;
+        }
+
+        .checkmark {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 30px;
+            width: 28px;
+            background-color: #eee;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            transition: background-color 0.3s ease;
+        }
+
+        .checkbox-container:hover input ~ .checkmark {
+            background-color: #ccc;
+        }
+
+        .checkbox-container input:checked ~ .checkmark {
+            background-color: #2196F3;
+        }
+
+        .checkmark:after {
+            content: "";
+            position: absolute;
+            display: none;
+        }
+
+        .checkbox-container input:checked ~ .checkmark:after {
+            display: block;
+        }
+
+        .checkbox-container .checkmark:after {
+            left: 9px;
+            top: 5px;
+            width: 7px;
+            height: 15px;
+            border: solid white;
+            border-width: 0 3px 3px 0;
+            transform: rotate(45deg);
+        }
+
+        /* Label hover effect */
+        .checkbox-container label {
+            transition: color 0.3s ease;
+        }
+
+        .checkbox-container:hover label {
+            color: #2196F3;
+        }
+
     </style>
 </head>
 <body>
@@ -114,7 +206,8 @@ $all_columns = [
         <a href="q3.php">Q3</a>
         <a href="q4.php">Q4</a>
         <a href="q5.php">Q5</a>
-        <a href="q6.php">Q6</a>
+        <a href="q6a.php">Personality Traits & Rating Correlation</a>
+        <a href="q6b.php">Personality Traits & Genres Correlation</a>
     </div>
     <div class="user-account">
         <?php if (isset($_SESSION['username'])) : ?>
@@ -140,7 +233,10 @@ $all_columns = [
         // Display checkboxes for each movie attribute
         foreach ($all_columns as $key => $value) {
             $checked = isset($_POST['selected_columns']) && in_array($key, $_POST['selected_columns']) ? 'checked' : '';
-            echo "<input type='checkbox' name='selected_columns[]' value='$key' $checked> $value";
+            echo "<label class='checkbox-container'><b>$value</b>
+            <input type='checkbox' name='selected_columns[]' value='$key' $checked>
+            <span class='checkmark'></span>
+            </label>";
         }
         ?>
         <br>
@@ -148,47 +244,74 @@ $all_columns = [
         <button type="button" onclick="selectAll()">Select All</button>
         <button type="button" onclick="unselectAll()">Unselect All</button>
         <input type="submit" name="submit" value="Submit">
+        <br>
+        <br>
+        <?php
+        if (isset($_POST['selected_columns']) && !empty($_POST['selected_columns'])) {
+            echo "<p>Page ";
+            echo "<select name=\"page\">";
+            for ($i = 1; $i <= $total_page; $i++) {
+                $selected = '';
+                if (isset($_POST['page']) && $_POST['page'] == $i) {
+                    $selected = 'selected';
+                }
+                echo "<option value='$i' $selected>$i</option>";
+            }
+            echo "</select>";
+            echo " / $total_page</p>";
+        }
+        ?>
     </form>
 
     <?php
-    // Initialize selected columns array
-    $selected_columns = [];
+        // Initialize selected columns array
+        $selected_columns = [];
 
-    // Handle form submission
-    if (isset($_POST['submit'])) {
-        if(isset($_POST['selected_columns']) && is_array($_POST['selected_columns'])) {
-            $selected_columns = $_POST['selected_columns'];
+        // Handle form submission
+        if (isset($_POST['submit'])) {
+            if(isset($_POST['selected_columns']) && is_array($_POST['selected_columns'])) {
+                $selected_columns = $_POST['selected_columns'];
+            }
         }
-    }
-    
-    // Build the SELECT part of the SQL query
-    if (isset($_POST['selected_columns'])) {
-        // Not empty - concatenate the selected columns with "m." prefix
-        $select_part = "m." . implode(", m.", $selected_columns);
-    } else {
-        // Empty - null
-        $select_part = "null";
-    }
+        
+        // Build the SELECT part of the SQL query
+        if (isset($_POST['selected_columns'])) {
+            // Not empty - concatenate the selected columns with "m." prefix
+            $select_part = "m.MovieID, m." . implode(", m.", $selected_columns);
+        } else {
+            // Empty - null
+            $select_part = "null";
+        }
 
-    // Set country and genre
-    $select_join = "";
-    // country
-    $select_part = str_replace("m.country", "GROUP_CONCAT(DISTINCT pc.countryName SEPARATOR ', ') AS country", $select_part);
-    if(in_array("country", $selected_columns)){
-        $select_join .= "LEFT JOIN movie_countries mc ON m.movieID = mc.movieID LEFT JOIN production_countries pc ON mc.countryID = pc.countryID ";
-    }
-    // genre
-    $select_part = str_replace("m.genre", "GROUP_CONCAT(DISTINCT genre.genreName SEPARATOR ', ') AS genre", $select_part);
-    if(in_array("genre", $selected_columns)){
-        $select_join .= "LEFT JOIN movie_genre ge ON m.movieID = ge.movieID LEFT JOIN genre ON ge.genreID = genre.genreID ";
-    }
-    // Construct the SQL query
-    // $sql = "SELECT $select_part FROM movies m $select_join  WHERE m.MovieID <= 1000 Group By m.MovieID";
-    $sql = "SELECT $select_part FROM movies m $select_join Group By m.MovieID";
+        // set page
+        if (isset($_POST['page'])) {
+            // Get the selected value from the $_POST array
+            $page = $_POST['page'];
+            $offset = ($page - 1) * $perPage;
+        }
 
-    // Execute the SQL query
-    // echo "$sql";
-    $result = $mysqli->query($sql);
+        // Set country and genre
+        $select_join = "";
+        // country
+        $select_part = str_replace("m.country", "GROUP_CONCAT(DISTINCT pc.countryName SEPARATOR ', ') AS country", $select_part);
+        if(in_array("country", $selected_columns)){
+            $select_join .= "LEFT JOIN movie_countries mc ON m.movieID = mc.movieID LEFT JOIN production_countries pc ON mc.countryID = pc.countryID ";
+        }
+        // genre
+        $select_part = str_replace("m.genre", "GROUP_CONCAT(DISTINCT genre.genreName SEPARATOR ', ') AS genre", $select_part);
+        if(in_array("genre", $selected_columns)){
+            $select_join .= "LEFT JOIN movie_genre ge ON m.movieID = ge.movieID LEFT JOIN genre ON ge.genreID = genre.genreID ";
+        }
+        $sql = 
+        "SELECT $select_part 
+        FROM movies m $select_join 
+        Group By m.MovieID
+        LIMIT $perPage OFFSET $offset;";
+
+        // Execute the SQL query
+        require 'setup_database.php';
+        $result = $mysqli->query($sql);
+        $mysqli->close();
 
     ?>
 </div>
@@ -222,9 +345,15 @@ $all_columns = [
         // Table headers
         echo "<tr>";
         foreach ($selected_columns as $column) {
-            echo "<th class='$column'>$all_columns[$column]</th>";
+            // Determine the class and width based on the column
+            $class = $column;
+            $width = ($column === 'poster_URL') ? '150px' : ''; // Set width to 150px if $column is 'poster_URL'
+
+            // Create the header cell with the appropriate class and width
+            echo "<th class='$class' style='width: $width;'>$all_columns[$column]</th>";
         }
         echo "</tr>";
+
 
         // Table contents
         while ($row = $result->fetch_assoc()) {
@@ -257,6 +386,7 @@ $all_columns = [
             echo "</tr>";
         }
         echo "</table>";
+        $result->free();
 
     } else {
         echo "Query failed: " . $mysqli->error;

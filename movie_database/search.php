@@ -1,9 +1,7 @@
 <?php 
 session_start();
 
-require 'setup_database.php';
-require 'database.php'; 
-
+// require 'setup_database.php';
 
 // Fetch distinct countries from the database
 ?>
@@ -54,6 +52,17 @@ require 'database.php';
             border: 1px solid #ddd;
             border-radius: 4px;
         }
+        select {
+            padding: 10px;
+            width: 50%;
+            max-width: 110px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            -webkit-appearance: none; /* Remove default arrow */
+            -moz-appearance: none;
+            appearance: none;
+            background-color: white; /* Reset background color */
+        }
         input[type="submit"] {
             background-color: #007bff;
             color: white;
@@ -83,7 +92,8 @@ require 'database.php';
         <a href="q3.php">Q3</a>
         <a href="q4.php">Q4</a>
         <a href="q5.php">Q5</a>
-        <a href="q6.php">Q6</a>
+        <a href="q6a.php">Personality Traits & Rating Correlation</a>
+        <a href="q6b.php">Personality Traits & Genres Correlation</a>
     </div>
     <div class="user-account">
         <?php if (isset($_SESSION['username'])) : ?>
@@ -104,7 +114,18 @@ require 'database.php';
 
 <div class="search-container">
     <form method="get">
-        <input type="text" id="search" name="search" placeholder="Enter movie title..." value="<?php echo isset($_GET['search']) ? $_GET['search'] : ''; ?>" >
+        <input type="text" id="search" name="search" placeholder="Enter movie title..." value="<?php echo isset($_GET['search']) ? $_GET['search'] : ''; ?>" required>
+        <select id="number_selection" name="number_selection" required>
+            <option value="" disabled>Select Label...</option>
+            <option value="fuzzy"<?php if(isset($_GET['number_selection']) && $_GET['number_selection'] == 'fuzzy') echo ' selected'; ?>>Fuzzy Search</option>
+            <option value="title"<?php if(isset($_GET['number_selection']) && $_GET['number_selection'] == 'title') echo ' selected'; ?>>Title</option>
+            <option value="director"<?php if(isset($_GET['number_selection']) && $_GET['number_selection'] == 'director') echo ' selected'; ?>>Director</option>
+            <option value="actor"<?php if(isset($_GET['number_selection']) && $_GET['number_selection'] == 'actor') echo ' selected'; ?>>Actor</option>
+            <option value="genre"<?php if(isset($_GET['number_selection']) && $_GET['number_selection'] == 'genre') echo ' selected'; ?>>Genre</option>
+            <option value="country"<?php if(isset($_GET['number_selection']) && $_GET['number_selection'] == 'country') echo ' selected'; ?>>Country</option>
+            <option value="year"<?php if(isset($_GET['number_selection']) && $_GET['number_selection'] == 'year') echo ' selected'; ?>>Release Year</option>
+            <option value="company"<?php if(isset($_GET['number_selection']) && $_GET['number_selection'] == 'company') echo ' selected'; ?>>Company</option>
+        </select>
         <input type="submit" value="Search">
     </form>
 </div>
@@ -114,11 +135,12 @@ require 'database.php';
     // Your PHP script for fetching and displaying search results
     if (isset($_GET['search'])) {
         // Assume $mysqli is already connected
+        require 'setup_database.php';
         $search = $_GET['search'];
         $search = "%" . $search . "%";
-        $result = searchMovies($mysqli, $search);
-        //$query = "SELECT * FROM movies WHERE title LIKE $search";
-        //$result = $mysqli->query($query);
+        $label = $_GET['number_selection'];
+        $result = searchMovies($mysqli, $label, $search);
+        $mysqli->close();
 
         if ($result) {
             // Start the table and optionally add a border for visibility
@@ -207,6 +229,8 @@ require 'database.php';
             }
             
             echo "</table>";
+            $result->free();
+
         } else {
             echo "Query failed: " . $mysqli->error;
         }
@@ -219,11 +243,37 @@ require 'database.php';
 
 <?php
 
-function searchMovies($mysqli, $searchTerm) {
-    // Escape the search term to prevent SQL Injection
-    $searchTerm = $mysqli->real_escape_string($searchTerm);
+function searchMovies($mysqli, $label, $searchTerm) {
+    switch ($label) {
+        case "fuzzy":
+          return search_fuzzy($mysqli, $searchTerm);
+          break;
+        case "title":
+          return search_title($mysqli, $searchTerm);
+          break;
+        case "director":
+          return search_director($mysqli, $searchTerm);
+          break;
+        case "actor":
+          return search_actor($mysqli, $searchTerm);
+          break;
+        case "genre":
+          return search_genre($mysqli, $searchTerm);
+          break;
+        case "country":
+          return search_country($mysqli, $searchTerm);
+          break;
+        case "year":
+          return search_year($mysqli, $searchTerm);
+          break;
+        case "company":
+          return search_company($mysqli, $searchTerm);
+          break;
+      }
+      
+}
 
-    // Base SQL query
+function search_fuzzy($mysqli, $searchTerm) {
     $sql = "SELECT m.*, ";
     $sql .= "GROUP_CONCAT(DISTINCT c.name SEPARATOR ', ') AS crew, ";
     $sql .= "GROUP_CONCAT(DISTINCT co.countryName SEPARATOR ', ') AS countries ";
@@ -237,18 +287,136 @@ function searchMovies($mysqli, $searchTerm) {
     $sql .= "LEFT JOIN production_countries co ON ct.countryID = co.countryID ";
     $sql .= "LEFT JOIN movie_production_companies mpc ON m.movieID = mpc.movieID ";
     $sql .= "LEFT JOIN production_companies cp ON mpc.companyID = cp.companyID ";
-    $sql .= "WHERE m.title LIKE '$searchTerm' OR ";
-    $sql .= "c.name LIKE '$searchTerm' OR ";
-    $sql .= "g.genreName LIKE '$searchTerm' OR ";
-    $sql .= "co.countryName LIKE '$searchTerm' OR ";
-    $sql .= "m.release_year LIKE '$searchTerm' OR ";
-    $sql .= "cp.companyName LIKE '$searchTerm' ";
+    $sql .= "WHERE m.title LIKE ? OR ";
+    $sql .= "c.name LIKE ? OR ";
+    $sql .= "g.genreName LIKE ? OR ";
+    $sql .= "co.countryName LIKE ? OR ";
+    $sql .= "m.release_year LIKE ? OR ";
+    $sql .= "cp.companyName LIKE ? ";
     $sql .= "GROUP BY m.movieID";
 
-    // Execute the query
-    $result = $mysqli->query($sql);
+    $stmt = $mysqli->prepare($sql);
+    $searchTerm = '%' . $searchTerm . '%';
+    $stmt->bind_param("ssssss", $searchTerm, $searchTerm, $searchTerm, $searchTerm, $searchTerm, $searchTerm);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $stmt->close();
 
-    return $result ;
+    return $result;
+}
+
+function search_title($mysqli, $searchTerm) {
+    $sql = "SELECT m.* ";
+    $sql .= "FROM movies m ";
+    $sql .= "WHERE m.title LIKE ?";
+    $sql .= " GROUP BY m.movieID";
+
+    $stmt = $mysqli->prepare($sql);
+    $searchTerm = '%' . $searchTerm . '%';
+    $stmt->bind_param("s", $searchTerm);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $stmt->close();
+    return $result;
+}
+
+function search_director($mysqli, $searchTerm) {
+    $sql = "SELECT m.* ";
+    $sql .= "FROM movies m ";
+    $sql .= "LEFT JOIN movie_crew mc ON m.movieID = mc.movieID ";
+    $sql .= "LEFT JOIN crew c ON mc.crewID = c.crewID ";
+    $sql .= "WHERE c.name LIKE ? AND mc.occupationID = 2";
+    $sql .= " GROUP BY m.movieID";
+
+    $stmt = $mysqli->prepare($sql);
+    $searchTerm = '%' . $searchTerm . '%';
+    $stmt->bind_param("s", $searchTerm);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $stmt->close();
+    return $result;
+}
+
+function search_actor($mysqli, $searchTerm) {
+    $sql = "SELECT m.* ";
+    $sql .= "FROM movies m ";
+    $sql .= "LEFT JOIN movie_crew mc ON m.movieID = mc.movieID ";
+    $sql .= "LEFT JOIN crew c ON mc.crewID = c.crewID ";
+    $sql .= "WHERE c.name LIKE ? AND mc.occupationID = 1";
+    $sql .= " GROUP BY m.movieID";
+
+    $stmt = $mysqli->prepare($sql);
+    $searchTerm = '%' . $searchTerm . '%';
+    $stmt->bind_param("s", $searchTerm);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $stmt->close();
+    return $result;
+}
+
+function search_genre($mysqli, $searchTerm) {
+    $sql = "SELECT m.* ";
+    $sql .= "FROM movies m ";
+    $sql .= "LEFT JOIN movie_genre mg ON m.movieID = mg.movieID ";
+    $sql .= "LEFT JOIN genre g ON mg.genreID = g.genreID ";
+    $sql .= "WHERE g.genreName LIKE ?";
+    $sql .= " GROUP BY m.movieID";
+
+    $stmt = $mysqli->prepare($sql);
+    $searchTerm = '%' . $searchTerm . '%';
+    $stmt->bind_param("s", $searchTerm);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $stmt->close();
+    return $result;
+}
+
+function search_country($mysqli, $searchTerm) {
+    $sql = "SELECT m.* ";
+    $sql .= "FROM movies m ";
+    $sql .= "LEFT JOIN movie_countries ct ON m.movieID = ct.movieID ";
+    $sql .= "LEFT JOIN production_countries co ON ct.countryID = co.countryID ";
+    $sql .= "WHERE co.countryName LIKE ?";
+    $sql .= " GROUP BY m.movieID";
+
+    $stmt = $mysqli->prepare($sql);
+    $searchTerm = '%' . $searchTerm . '%';
+    $stmt->bind_param("s", $searchTerm);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $stmt->close();
+    return $result;
+}
+
+function search_year($mysqli, $searchTerm) {
+    $sql = "SELECT m.* ";
+    $sql .= "FROM movies m ";
+    $sql .= "WHERE m.release_year LIKE ?";
+    $sql .= " GROUP BY m.movieID";
+
+    $stmt = $mysqli->prepare($sql);
+    $searchTerm = '%' . $searchTerm . '%';
+    $stmt->bind_param("s", $searchTerm);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $stmt->close();
+    return $result;
+}
+
+function search_company($mysqli, $searchTerm) {
+    $sql = "SELECT m.* ";
+    $sql .= "FROM movies m ";
+    $sql .= "LEFT JOIN movie_production_companies mpc ON m.movieID = mpc.movieID ";
+    $sql .= "LEFT JOIN production_companies cp ON mpc.companyID = cp.companyID ";
+    $sql .= "WHERE cp.companyName LIKE ?";
+    $sql .= " GROUP BY m.movieID";
+
+    $stmt = $mysqli->prepare($sql);
+    $searchTerm = '%' . $searchTerm . '%';
+    $stmt->bind_param("s", $searchTerm);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $stmt->close();
+    return $result;
 }
 ?>
-

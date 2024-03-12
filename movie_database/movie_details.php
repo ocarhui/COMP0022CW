@@ -3,7 +3,6 @@
 session_start();
 
 require 'setup_database.php';
-require 'database.php'; 
 
 
 // Retrieve movie_id from the URL query string
@@ -87,6 +86,7 @@ if ($movie_id > 0) {
                    WHERE tg.movieID = $movie_id";
     
     $tags = $mysqli->query($query_tags);
+    $mysqli->close();
 }
 
 
@@ -148,6 +148,18 @@ if ($movie_id > 0) {
         .back-button:hover {
             background-color: #e8e8e8;
         } 
+        input[type="submit"] {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+
 
     </style>
 </head>
@@ -162,6 +174,8 @@ if ($movie_id > 0) {
             <a href="q3.php">Q3</a>
             <a href="q4.php">Q4</a>
             <a href="q5.php">Q5</a>
+            <a href="q6a.php">Personality Traits & Rating Correlation</a>
+            <a href="q6b.php">Personality Traits & Genres Correlation</a>
         </div>
         <div class="user-account">
             <?php if (isset($_SESSION['username'])) : ?>

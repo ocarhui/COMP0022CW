@@ -44,6 +44,7 @@ require 'database.php';
             margin-left: 10px;
         }
         .search-container {
+            font-size: 20px;
             padding: 20px;
             text-align: center;
         }
@@ -62,6 +63,7 @@ require 'database.php';
             border-radius: 4px;
         }
         select {
+            font-size: 16px;
             padding: 10px;
             width: 50%;
             max-width: 70px;
@@ -84,6 +86,7 @@ require 'database.php';
             background-color: #0056b3;
         }
         .results {
+            font-size: 26px;
             padding: 20px;
             text-align: center;
         }
