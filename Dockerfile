@@ -1,6 +1,9 @@
-FROM php:apache
+FROM php:fpm
 
-# Install mysqli extension
 RUN docker-php-ext-install mysqli
 
-CMD ["/usr/sbin/apache2ctl", "-D", "FOREGROUND"]
+RUN apt-get update && apt-get install -y nginx
+
+COPY nginx.conf /etc/nginx/nginx.conf
+
+CMD ["nginx", "-g", "daemon off;"]
