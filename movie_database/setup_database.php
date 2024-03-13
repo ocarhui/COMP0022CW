@@ -1,6 +1,6 @@
 <?php
 
-    $mysqli = new mysqli("db", "movieadmin", "secretpassword", "movie_database");
+    $mysqli = new mysqli("haproxy", "movieadmin", "secretpassword", "movie_database");
     $mysqli->query('SET GLOBAL local_infile=1');
 
     mysqli_options($mysqli, MYSQLI_OPT_LOCAL_INFILE, true);
@@ -305,6 +305,49 @@
                         LINES TERMINATED BY '\n'
                         IGNORE 1 LINES
                         (rating_userID, movieID, rating, timestamp)";
+        
+        // Execute the SQL statement
+        $mysqli->query($loadDataSQL);
+        // if ($mysqli->query($loadDataSQL) === TRUE) {
+        //     // echo "ratings.csv loaded successfully.\n";
+        // } else {
+        //     echo "Error loading data: " . $mysqli->error;
+        // }
+    }
+
+
+    // Loading personality
+    $result = $mysqli->query("SELECT * FROM `personality` LIMIT 1");
+    if ($result && $result->num_rows > 0) {
+        // echo "Table 'ratings' is not empty. No need to load data.\n";
+    } else {
+        $loadDataSQL = "LOAD DATA LOCAL INFILE 'Data/personality.csv'
+                        INTO TABLE `personality`
+                        FIELDS TERMINATED BY ','
+                        LINES TERMINATED BY '\n'
+                        IGNORE 1 LINES
+                        (rating_userID, agreeableness, emotional_stability, conscientiousness, extraversion,
+                        assigned_metric, assigned_condition, is_personalised, enjoy_watching)";
+        
+        // Execute the SQL statement
+        if ($mysqli->query($loadDataSQL) === TRUE) {
+            // echo "ratings.csv loaded successfully.\n";
+        } else {
+            echo "Error loading data: " . $mysqli->error;
+        }
+    }
+
+    // Loading personality-movie-prediction
+    $result = $mysqli->query("SELECT * FROM `personality_movie_prediction` LIMIT 1");
+    if ($result && $result->num_rows > 0) {
+        // echo "Table 'ratings' is not empty. No need to load data.\n";
+    } else {
+        $loadDataSQL = "LOAD DATA LOCAL INFILE 'Data/personality-movie-predicted-rating.csv'
+                        INTO TABLE `personality_movie_prediction`
+                        FIELDS TERMINATED BY ','
+                        LINES TERMINATED BY '\n'
+                        IGNORE 1 LINES
+                        (rating_userID, movie_order, movieID, predicted_rating)";
         
         // Execute the SQL statement
         if ($mysqli->query($loadDataSQL) === TRUE) {

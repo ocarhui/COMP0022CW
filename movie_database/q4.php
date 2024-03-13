@@ -1,8 +1,7 @@
 <?php 
 session_start();
 
-require 'setup_database.php';
-require 'database.php'; 
+// require 'setup_database.php';
 
 
 // Fetch distinct countries from the database
@@ -48,6 +47,13 @@ require 'database.php';
             text-align: center;
         }
         input[type="text"] {
+            padding: 10px;
+            width: 50%;
+            max-width: 70px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        input[type="number"] {
             padding: 10px;
             width: 50%;
             max-width: 70px;
@@ -119,6 +125,8 @@ require 'database.php';
         <a href="q3.php">Q3</a>
         <a href="q4.php"><u>Q4</u></a>
         <a href="q5.php">Q5</a>
+        <a href="q6a.php">Personality Traits & Rating Correlation</a>
+        <a href="q6b.php">Personality Traits & Genres Correlation</a>
     </div>
     <div class="user-account">
         <?php if (isset($_SESSION['username'])) : ?>
@@ -140,11 +148,13 @@ require 'database.php';
 <div class="search-container">
     <form method="post">
         <h3>Reactions to movie
-        <input type="text" id="movie" name="movie" placeholder="Movie ID..." value="<?php echo isset($_POST['movie']) ? $_POST['movie'] : ''; ?>" required>
+        <input type="text" id="movie" name="movie" placeholder="Movie Title..." value="<?php echo isset($_POST['movie']) ? $_POST['movie'] : ''; ?>" required>
          from viewers who tend to give ratings between 
-        <input type="text" id="upper" name="upper" placeholder="0" value="<?php echo isset($_POST['upper']) ? $_POST['upper'] : ''; ?>">
+        <!-- <input type="text" id="upper" name="upper" placeholder="0" value="<?php echo isset($_POST['upper']) ? $_POST['upper'] : ''; ?>"> -->
+        <input type="number" step="0.01" id="upper" name="upper" placeholder="0" value="<?php echo isset($_POST['upper']) ? $_POST['upper'] : ''; ?>" min="0" max="5">
          and 
-        <input type="text" id="lower" name="lower" placeholder="0" value="<?php echo isset($_POST['lower']) ? $_POST['lower'] : ''; ?>">
+        <!-- <input type="text" id="lower" name="lower" placeholder="0" value="<?php echo isset($_POST['lower']) ? $_POST['lower'] : ''; ?>"> -->
+        <input type="number" step="0.01" id="lower" name="lower" placeholder="0" value="<?php echo isset($_POST['lower']) ? $_POST['lower'] : ''; ?>" min="0" max="5">
         <input type="submit" name="MovieID" value="Submit">
         </h3>
     </form>
@@ -154,9 +164,11 @@ require 'database.php';
         from viewers who tend to give ratings for movies in genre
         <input type="text" id="origin_genre" name="origin_genre" placeholder="Genre..." value="<?php echo isset($_POST['origin_genre']) ? $_POST['origin_genre'] : ''; ?>" required>
         between 
-        <input type="text" id="genre_upper" name="genre_upper" placeholder="0" value="<?php echo isset($_POST['genre_upper']) ? $_POST['genre_upper'] : ''; ?>">
+        <!-- <input type="text" id="genre_upper" name="genre_upper" placeholder="0" value="<?php echo isset($_POST['genre_upper']) ? $_POST['genre_upper'] : ''; ?>"> -->
+        <input type="number" step="0.01" id="genre_upper" name="genre_upper" placeholder="0" value="<?php echo isset($_POST['genre_upper']) ? $_POST['genre_upper'] : ''; ?>" min="0" max="5">
          and 
-        <input type="text" id="genre_lower" name="genre_lower" placeholder="0" value="<?php echo isset($_POST['genre_lower']) ? $_POST['genre_lower'] : ''; ?>">
+        <!-- <input type="text" id="genre_lower" name="genre_lower" placeholder="0" value="<?php echo isset($_POST['genre_lower']) ? $_POST['genre_lower'] : ''; ?>"> -->
+        <input type="number" step="0.01" id="genre_lower" name="genre_lower" placeholder="0" value="<?php echo isset($_POST['genre_lower']) ? $_POST['genre_lower'] : ''; ?>" min="0" max="5">
         <input type="submit" name="GenreID" value="Submit">
         </h3>
     </form>
@@ -167,6 +179,7 @@ require 'database.php';
     // Reactions in Movies
     if (isset($_POST['MovieID'])) {
         // Assume $mysqli is already connected
+        require 'setup_database.php';
         $movie = $_POST['movie'];
         $upper = !empty($_POST['upper']) ? $_POST['upper'] : 0;
         $lower = !empty($_POST['lower']) ? $_POST['lower'] : 0;
@@ -176,6 +189,8 @@ require 'database.php';
             $lower = $temp;
         }
         $result = movieReaction($mysqli, $movie, $upper, $lower);
+        $mysqli->close();
+
         if (mysqli_num_rows($result) === 0) {
             echo "<h3>No Result</h3>";
         } elseif ($result) {
@@ -201,35 +216,27 @@ require 'database.php';
             echo "<table border='0'>";
 
             // Table headers
-            echo "<tr> <th>Number of Viewers</th> <th>Number of Ratings</th> <th>Average Rating</th> <th>High Rating Viewer Number</th> <th>Moderate Rating Viewer Number</th> <th>Low Rating Viewer Number</th> </tr>";
+            echo "<tr> <th>Movie</th> <th>Number of Viewers</th> <th>Average Rating</th> <th>High Rating Viewer Number</th> <th>Moderate Rating Viewer Number</th> <th>Low Rating Viewer Number</th> </tr>";
 
-            $count = mysqli_num_rows($result);
-            $total = 0;
-            $high = 0;
-            $mid = 0;
-            $low = 0;
             // Table contents
-            while ($row = $result->fetch_assoc()) {
-                $total += $row['rating_for_chosen_movie'];
-                switch(true) {
-                    case ($row['rating_for_chosen_movie'] < 2.5):
-                        $low += 1;
-                        break;
-                    case ($row['rating_for_chosen_movie'] >= 3.5):
-                        $high += 1;
-                        break;
-                    default:
-                        $mid += 1;
-                        break;
-                  }                  
-            }
+            $row = $result->fetch_assoc();
+            $title = $_POST['movie'];
+            $movieID = $row['movieID'];
+            $count = $row['total_rating'];
+            $average = $row['average_rating'];
+            $high = $row['high'];
+            $low = $row['low'];
+            $mid = $count - $high - $low;
+
             echo "<tr>";
-            echo "<td>" . $count . "</td><td>" . $count . "</td><td>" . round($total / $count, 2) . "</td>";
+            echo "<td><a href='movie_details.php?id=" . $movieID . "' target='_blank'><b>" . $title . "</b></a></td>";
+            echo "<td>" . $count . "</td><td>" . round($average, 2) . "</td>";
             echo '<td><div class="high" style="width: ' . $high/$count*100 . '%;"></div>' . round($high*100/$count, 2) . '% ('. $high .')</td>';
             echo '<td><div class="mid" style="width: ' . $mid/$count*100 . '%;"></div>' . round($mid*100/$count, 2) . '% ('. $mid .')</td>';
             echo '<td><div class="low" style="width: ' . $low/$count*100 . '%;"></div>' . round($low*100/$count, 2) . '% ('. $low .')</td>';
             echo "</tr>";
             echo "</table>";
+            $result->free();
             
         } else {
             echo "Query failed: " . $mysqli->error;
@@ -239,6 +246,7 @@ require 'database.php';
     // Reactions in Genres
     if (isset($_POST['GenreID'])) {
         // Assume $mysqli is already connected
+        require 'setup_database.php';
         $target_genre = $_POST['target_genre'];
         $origin_genre = $_POST['origin_genre'];
         $genre_upper = !empty($_POST['genre_upper']) ? $_POST['genre_upper'] : 0;
@@ -249,7 +257,7 @@ require 'database.php';
             $genre_lower = $temp;
         }
         $result = genreReaction($mysqli, $target_genre, $origin_genre, $genre_upper, $genre_lower);
-        
+        $mysqli->close();
         
         if (mysqli_num_rows($result) === 0) {
             echo "<h3>No Result</h3>";
@@ -278,35 +286,22 @@ require 'database.php';
             // Table headers
             echo "<tr> <th>Number of Viewers</th> <th>Number of Ratings</th> <th>Average Rating</th> <th>High Rating Viewer Number</th> <th>Moderate Rating Viewer Number</th> <th>Low Rating Viewer Number</th> </tr>";
 
-            $numviewer = mysqli_num_rows($result);
-            $count = 0;
-            $total = 0;
-            $high = 0;
-            $mid = 0;
-            $low = 0;
-            // Table contents
-            while ($row = $result->fetch_assoc()) {
-                $count += $row['rating_genre_count'];
-                $total += $row['rating_genre_count'] * $row['avg_rating_genre'];
-                switch(true) {
-                    case ($row['avg_rating_genre'] < 2.5):
-                        $low += 1;
-                        break;
-                    case ($row['avg_rating_genre'] >= 3.5):
-                        $high += 1;
-                        break;
-                    default:
-                        $mid += 1;
-                        break;
-                  }                  
-            }
+            $row = $result->fetch_assoc();
+            $total_viewers = $row['total_viewers'];
+            $total_ratings = $row['total_ratings'];
+            $average_rating = $row['average_rating'];
+            $high = $row['high'];
+            $low = $row['low'];
+            $mid = $total_viewers - $high - $low;
+
             echo "<tr>";
-            echo "<td>" . $numviewer . "</td><td>" . $count . "</td><td>" . round($total / $count, 2) . "</td>";
-            echo '<td><div class="high" style="width: ' . $high/$numviewer*100 . '%;"></div>' . round($high*100/$numviewer, 2) . '% ('. $high .')</td>';
-            echo '<td><div class="mid" style="width: ' . $mid/$numviewer*100 . '%;"></div>' . round($mid*100/$numviewer, 2) . '% ('. $mid .')</td>';
-            echo '<td><div class="low" style="width: ' . $low/$numviewer*100 . '%;"></div>' . round($low*100/$numviewer, 2) . '% ('. $low .')</td>';
+            echo "<td>" . $total_viewers . "</td><td>" . $total_ratings . "</td><td>" . round($average_rating, 2) . "</td>";
+            echo '<td><div class="high" style="width: ' . $high/$total_viewers*100 . '%;"></div>' . round($high*100/$total_viewers, 2) . '% ('. $high .')</td>';
+            echo '<td><div class="mid" style="width: ' . $mid/$total_viewers*100 . '%;"></div>' . round($mid*100/$total_viewers, 2) . '% ('. $mid .')</td>';
+            echo '<td><div class="low" style="width: ' . $low/$total_viewers*100 . '%;"></div>' . round($low*100/$total_viewers, 2) . '% ('. $low .')</td>';
             echo "</tr>";
             echo "</table>";
+            $result->free();
             
         } else {
             echo "Query failed: " . $mysqli->error;
@@ -322,92 +317,100 @@ require 'database.php';
 <?php
 
 function movieReaction($mysqli, $movie, $upper, $lower) {
-    // Escape the search term to prevent SQL Injection
-    $movie = $mysqli->real_escape_string($movie);
-    $upper = $mysqli->real_escape_string($upper);
-    $lower = $mysqli->real_escape_string($lower);
-
-    // Base SQL query
     $sql = 
-    "SELECT 
-        t1.rating_userID,
-        (
-            SELECT t2.rating 
-            FROM  ratings t2 
-            WHERE t2.rating_userID = t1.rating_userID AND t2.movieID = $movie
-            LIMIT 1
-        ) AS rating_for_chosen_movie
-    FROM 
-         ratings t1
-    GROUP BY 
-        t1.rating_userID
-    HAVING 
-        AVG(t1.rating) <= $upper AND AVG(t1.rating) >= $lower
-        AND rating_for_chosen_movie IS NOT NULL;";
+    "SELECT
+        movieID,
+        COUNT(*) AS total_rating,
+        AVG(rating_for_chosen_movie) AS average_rating,
+        SUM(CASE WHEN rating_for_chosen_movie >= 3.5 THEN 1 ELSE 0 END) AS high,
+        SUM(CASE WHEN rating_for_chosen_movie < 2.5 THEN 1 ELSE 0 END) AS low
+    FROM (
+        SELECT 
+            t1.rating_userID,
+            (
+                SELECT t2.rating 
+                FROM ratings t2 
+                WHERE t2.rating_userID = t1.rating_userID AND t2.movieID = (SELECT movieID FROM movies WHERE title = ?)
+                LIMIT 1
+            ) AS rating_for_chosen_movie,
+            (SELECT movieID FROM movies WHERE title = ?) AS movieID
+        FROM 
+            ratings t1
+        GROUP BY 
+            t1.rating_userID
+        HAVING 
+            AVG(t1.rating) <= ? AND AVG(t1.rating) >= ?
+            AND rating_for_chosen_movie IS NOT NULL
+    ) AS subquery
+    GROUP BY movieID;";
 
-    // Execute the query
-    $result = $mysqli->query($sql);
-
-    return $result ;
+    // Prepare the statement
+    if ($stmt = $mysqli->prepare($sql)) {
+        $stmt->bind_param("ssdd", $movie, $movie, $upper, $lower);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $stmt->close();
+        return $result;
+    } else {
+        // Handle error if preparation fails
+        // return false;
+        die("Preparation failed: " . $mysqli->error);
+    }
 }
 
 function genreReaction($mysqli, $target_genre, $origin_genre, $genre_upper, $genre_lower) {
-    // Escape the search term to prevent SQL Injection
-    $target_genre = $mysqli->real_escape_string($target_genre);
-    $origin_genre = $mysqli->real_escape_string($origin_genre);
-    $genre_upper = $mysqli->real_escape_string($genre_upper);
-    $genre_lower = $mysqli->real_escape_string($genre_lower);
-
-    // Base SQL query
     $sql = 
     "WITH OriginGenreRatings AS (
         SELECT 
             r.rating_userID
         FROM 
              ratings r
-            -- ratings r
         JOIN 
             movie_genre mg ON r.movieID = mg.movieID
         JOIN 
             genre g ON mg.genreID = g.genreID
         WHERE 
-            g.genreName = '$origin_genre'
+            g.genreName = ?
         GROUP BY 
             r.rating_userID
         HAVING 
-            AVG(r.rating) <= $genre_upper AND AVG(r.rating) >= $genre_lower
+            AVG(r.rating) <= ? AND AVG(r.rating) >= ?
     )
     SELECT 
-        c.rating_userID,
-        a.avg_rating_genre,
-        a.rating_genre_count
+        COUNT(*) AS total_viewers,
+        SUM(a.rating_genre_count) AS total_ratings,
+        COUNT(CASE WHEN a.avg_rating_genre >= 3.5 THEN 1 END) AS high,
+        COUNT(CASE WHEN a.avg_rating_genre < 2.5 THEN 1 END) AS low,
+        (SUM(a.avg_rating_genre * a.rating_genre_count) / SUM(a.rating_genre_count)) AS average_rating
     FROM 
         OriginGenreRatings c
     JOIN 
         (SELECT 
-             r.rating_userID,
+            r.rating_userID,
              AVG(r.rating) AS avg_rating_genre,
-             COUNT(r.rating) AS rating_genre_count
-         FROM 
-              ratings r
-            --  ratings r
-         JOIN 
-             movie_genre mg ON r.movieID = mg.movieID
-         JOIN 
-             genre g ON mg.genreID = g.genreID
-         WHERE 
-             g.genreName = '$target_genre'
-         AND
-             r.rating_userID IN (SELECT rating_userID FROM OriginGenreRatings)
-         GROUP BY 
-             r.rating_userID) a
+            COUNT(r.rating) AS rating_genre_count
+        FROM 
+            ratings r
+        JOIN 
+            movie_genre mg ON r.movieID = mg.movieID
+        JOIN 
+            genre g ON mg.genreID = g.genreID
+        WHERE 
+            g.genreName = ?
+        AND
+            r.rating_userID IN (SELECT rating_userID FROM OriginGenreRatings)
+        GROUP BY 
+            r.rating_userID) a
     ON 
         c.rating_userID = a.rating_userID;";
 
-    // Execute the query
-    $result = $mysqli->query($sql);
+    $stmt = $mysqli->prepare($sql);
+    $stmt->bind_param("sdds", $origin_genre, $genre_upper, $genre_lower, $target_genre);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $stmt->close();
 
-    return $result ;
+    return $result;
 }
 
 

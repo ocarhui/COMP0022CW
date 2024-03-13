@@ -1,8 +1,7 @@
 <?php 
 session_start();
 
-require 'setup_database.php';
-require 'database.php'; 
+// require 'setup_database.php';
 
 
 // Fetch distinct countries from the database
@@ -119,6 +118,8 @@ require 'database.php';
         <a href="q3.php"><u>Q3</u></a>
         <a href="q4.php">Q4</a>
         <a href="q5.php">Q5</a>
+        <a href="q6a.php">Personality Traits & Rating Correlation</a>
+        <a href="q6b.php">Personality Traits & Genres Correlation</a>
     </div>
     <div class="user-account">
         <?php if (isset($_SESSION['username'])) : ?>
@@ -150,7 +151,7 @@ require 'database.php';
             <input type="submit" name="IMDBHighest" value="Highest Rated">
             <!-- SPACE --> &#160&#160&#160
             TMDB:
-            <input type="submit" name="TMDB" value="Highest Rated">
+            <input type="submit" name="TMDB" value="Highest Popularity">
         </h3>
     </form>
 </div>
@@ -160,8 +161,9 @@ require 'database.php';
     // Most Rated
     if (isset($_POST['MostRated'])) {
         // Assume $mysqli is already connected
-        $search = $_POST['MostRated'];
-        $result = mostRated($mysqli, $search);
+        require 'setup_database.php';
+        $result = mostRated($mysqli);
+        $mysqli->close();
 
         if ($result) {
             // Start the table and optionally add a border for visibility
@@ -202,6 +204,7 @@ require 'database.php';
             }
             
             echo "</table>";
+            $result->free();
         } else {
             echo "Query failed: " . $mysqli->error;
         }
@@ -210,8 +213,9 @@ require 'database.php';
     // Highest Rated
     if (isset($_POST['HighestRated'])) {
         // Assume $mysqli is already connected
-        $search = $_POST['HighestRated'];
-        $result = highestRated($mysqli, $search);
+        require 'setup_database.php';        
+        $result = highestRated($mysqli);
+        $mysqli->close();
 
         if ($result) {
             // Start the table and optionally add a border for visibility
@@ -252,6 +256,7 @@ require 'database.php';
             }
             
             echo "</table>";
+            $result->free();
         } else {
             echo "Query failed: " . $mysqli->error;
         }
@@ -260,8 +265,9 @@ require 'database.php';
     // Highest Polarisation
     if (isset($_POST['MostPolarised'])) {
         // Assume $mysqli is already connected
-        $search = $_POST['MostPolarised'];
-        $result = highestPolarisation($mysqli, $search);
+        require 'setup_database.php';
+        $result = highestPolarisation($mysqli);
+        $mysqli->close();
 
         if ($result) {
             // Start the table and optionally add a border for visibility
@@ -314,6 +320,7 @@ require 'database.php';
             }
             
             echo "</table>";
+            $result->free();
         } else {
             echo "Query failed: " . $mysqli->error;
         }
@@ -322,8 +329,9 @@ require 'database.php';
     // IMDB Most Rating
     if (isset($_POST['IMDBMost'])) {
         // Assume $mysqli is already connected
-        $search = $_POST['IMDBMost'];
-        $result = IMDBMost($mysqli, $search);
+        require 'setup_database.php';
+        $result = IMDBMost($mysqli);
+        $mysqli->close();
 
         if ($result) {
             // Start the table and optionally add a border for visibility
@@ -360,6 +368,7 @@ require 'database.php';
             }
             
             echo "</table>";
+            $result->free();
         } else {
             echo "Query failed: " . $mysqli->error;
         }
@@ -368,8 +377,9 @@ require 'database.php';
     // IMDB Highest Rating
     if (isset($_POST['IMDBHighest'])) {
         // Assume $mysqli is already connected
-        $search = $_POST['IMDBHighest'];
-        $result = IMDBHighest($mysqli, $search);
+        require 'setup_database.php';
+        $result = IMDBHighest($mysqli);
+        $mysqli->close();
 
         if ($result) {
             // Start the table and optionally add a border for visibility
@@ -406,6 +416,7 @@ require 'database.php';
             }
             
             echo "</table>";
+            $result->free();
         } else {
             echo "Query failed: " . $mysqli->error;
         }
@@ -414,8 +425,9 @@ require 'database.php';
     // TMDB Rating
     if (isset($_POST['TMDB'])) {
         // Assume $mysqli is already connected
-        $search = $_POST['TMDB'];
-        $result = TMDB($mysqli, $search);
+        require 'setup_database.php';        
+        $result = TMDB($mysqli);
+        $mysqli->close();
 
         if ($result) {
             // Start the table and optionally add a border for visibility
@@ -451,6 +463,7 @@ require 'database.php';
             }
             
             echo "</table>";
+            $result->free();
         } else {
             echo "Query failed: " . $mysqli->error;
         }
@@ -464,10 +477,7 @@ require 'database.php';
 
 <?php
 
-function mostRated($mysqli, $searchTerm) {
-    // Escape the search term to prevent SQL Injection
-    $searchTerm = $mysqli->real_escape_string($searchTerm);
-
+function mostRated($mysqli) {
     // Base SQL query
     $sql = 
     "WITH RatingStats AS (
@@ -500,14 +510,10 @@ function mostRated($mysqli, $searchTerm) {
 
     // Execute the query
     $result = $mysqli->query($sql);
-
     return $result ;
 }
 
-function highestRated($mysqli, $searchTerm) {
-    // Escape the search term to prevent SQL Injection
-    $searchTerm = $mysqli->real_escape_string($searchTerm);
-
+function highestRated($mysqli) {
     // Base SQL query
     $sql = 
     "WITH RatingStats AS (
@@ -545,10 +551,7 @@ function highestRated($mysqli, $searchTerm) {
 
 }
 
-function highestPolarisation($mysqli, $searchTerm) {
-    // Escape the search term to prevent SQL Injection
-    $searchTerm = $mysqli->real_escape_string($searchTerm);
-
+function highestPolarisation($mysqli) {
     // Base SQL query
     $sql = 
     "WITH RatingStats AS (
@@ -598,10 +601,7 @@ function highestPolarisation($mysqli, $searchTerm) {
 
 }
 
-function IMDBHighest($mysqli, $searchTerm) {
-    // Escape the search term to prevent SQL Injection
-    $searchTerm = $mysqli->real_escape_string($searchTerm);
-
+function IMDBHighest($mysqli) {
     // Base SQL query
     $sql = 
     "SELECT g.genreName, COUNT(mg.movieID) AS movie_count, AVG(m.imdb_rating) AS avg_popularity, SUM(m.imdb_rating_votes) AS number_ratings
@@ -617,10 +617,7 @@ function IMDBHighest($mysqli, $searchTerm) {
     return $result ;
 }
 
-function IMDBMost($mysqli, $searchTerm) {
-    // Escape the search term to prevent SQL Injection
-    $searchTerm = $mysqli->real_escape_string($searchTerm);
-
+function IMDBMost($mysqli) {
     // Base SQL query
     $sql = 
     "SELECT g.genreName, COUNT(mg.movieID) AS movie_count, AVG(m.imdb_rating) AS avg_popularity, SUM(m.imdb_rating_votes) AS number_ratings
@@ -636,10 +633,7 @@ function IMDBMost($mysqli, $searchTerm) {
     return $result ;
 }
 
-function TMDB($mysqli, $searchTerm) {
-    // Escape the search term to prevent SQL Injection
-    $searchTerm = $mysqli->real_escape_string($searchTerm);
-
+function TMDB($mysqli) {
     // Base SQL query
     $sql = 
     "SELECT g.genreName, COUNT(mg.movieID) AS movie_count, AVG(m.tmdb_popularity) AS avg_popularity

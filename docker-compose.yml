@@ -1,37 +1,94 @@
 version: '4'
 services:
 
-  db: 
+  db1: 
     image: mysql:latest
     restart: always
     environment:
       - MYSQL_DATABASE=php_docker
       - MYSQL_USER=php_docker
-      - MYSQL_PASSWORD=password # this should live in a env var
-      - MYSQL_ALLOW_EMPTY_PASSWORD=1 # equivalent to True
+      - MYSQL_PASSWORD=password
+      - MYSQL_ALLOW_EMPTY_PASSWORD=1
+      # MYSQL_ROOT_PASSWORD: password
     volumes:
-      - "./db:/docker-entrypoint-initdb.d" # this is how we persist a sql db even when container stops
+      - "./db:/docker-entrypoint-initdb.d"
 
-  www:
+  db2: 
+    image: mysql:latest
+    restart: always
+    environment:
+      - MYSQL_DATABASE=php_docker
+      - MYSQL_USER=php_docker
+      - MYSQL_PASSWORD=password
+      - MYSQL_ALLOW_EMPTY_PASSWORD=1
+      # MYSQL_ROOT_PASSWORD: password
+    volumes:
+      - "./db:/docker-entrypoint-initdb.d"
+
+  db3: 
+    image: mysql:latest
+    restart: always
+    environment:
+      - MYSQL_DATABASE=php_docker
+      - MYSQL_USER=php_docker
+      - MYSQL_PASSWORD=password
+      - MYSQL_ALLOW_EMPTY_PASSWORD=1
+      # MYSQL_ROOT_PASSWORD: password
+    volumes:
+      - "./db:/docker-entrypoint-initdb.d"
+
+  haproxy:
+    image: haproxy:latest
+    ports:
+      - "3306:3306"
+    volumes:
+      - "./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro"
+    depends_on:
+      - db1
+      - db2
+      - db3
+
+  www1:
     build:
       context: .
-      dockerfile: Dockerfile  # Use the custom Dockerfile
+      dockerfile: Dockerfile
     volumes:
       - "./movie_database:/var/www/html"
     depends_on:
-      - db 
+      - haproxy
     expose:
       - "80"
-    # ports:
-    #   - 80:80
-    # - 443:443
+
+  www2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - "./movie_database:/var/www/html"
+    depends_on:
+      - haproxy
+    expose:
+      - "80"
+
+  www3:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - "./movie_database:/var/www/html"
+    depends_on:
+      - haproxy
+    expose:
+      - "80"
 
   nginx:
     image: nginx:latest
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
-      - www
+      - www1
+      - www2
+      - www3
     ports:
       - "4000:4000"
   
@@ -40,5 +97,5 @@ services:
     ports:
       - 8001:80
     environment:
-      - PMA_HOST=db
+      - PMA_HOST=haproxy
       - PMA_PORT=3306
