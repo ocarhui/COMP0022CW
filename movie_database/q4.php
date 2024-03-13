@@ -148,13 +148,13 @@ session_start();
 <div class="search-container">
     <form method="post">
         <h3>Reactions to movie
-        <input type="text" id="movie" name="movie" placeholder="Movie ID..." value="<?php echo isset($_POST['movie']) ? $_POST['movie'] : ''; ?>" required>
+        <input type="text" id="movie" name="movie" placeholder="Movie Title..." value="<?php echo isset($_POST['movie']) ? $_POST['movie'] : ''; ?>" required>
          from viewers who tend to give ratings between 
         <!-- <input type="text" id="upper" name="upper" placeholder="0" value="<?php echo isset($_POST['upper']) ? $_POST['upper'] : ''; ?>"> -->
-        <input type="number" step="0.01" id="upper" name="upper" placeholder="0" value="<?php echo isset($_POST['upper']) ? $_POST['upper'] : ''; ?>">
+        <input type="number" step="0.01" id="upper" name="upper" placeholder="0" value="<?php echo isset($_POST['upper']) ? $_POST['upper'] : ''; ?>" min="0" max="5">
          and 
         <!-- <input type="text" id="lower" name="lower" placeholder="0" value="<?php echo isset($_POST['lower']) ? $_POST['lower'] : ''; ?>"> -->
-        <input type="number" step="0.01" id="lower" name="lower" placeholder="0" value="<?php echo isset($_POST['lower']) ? $_POST['lower'] : ''; ?>">
+        <input type="number" step="0.01" id="lower" name="lower" placeholder="0" value="<?php echo isset($_POST['lower']) ? $_POST['lower'] : ''; ?>" min="0" max="5">
         <input type="submit" name="MovieID" value="Submit">
         </h3>
     </form>
@@ -165,10 +165,10 @@ session_start();
         <input type="text" id="origin_genre" name="origin_genre" placeholder="Genre..." value="<?php echo isset($_POST['origin_genre']) ? $_POST['origin_genre'] : ''; ?>" required>
         between 
         <!-- <input type="text" id="genre_upper" name="genre_upper" placeholder="0" value="<?php echo isset($_POST['genre_upper']) ? $_POST['genre_upper'] : ''; ?>"> -->
-        <input type="number" step="0.01" id="genre_upper" name="genre_upper" placeholder="0" value="<?php echo isset($_POST['genre_upper']) ? $_POST['genre_upper'] : ''; ?>">
+        <input type="number" step="0.01" id="genre_upper" name="genre_upper" placeholder="0" value="<?php echo isset($_POST['genre_upper']) ? $_POST['genre_upper'] : ''; ?>" min="0" max="5">
          and 
         <!-- <input type="text" id="genre_lower" name="genre_lower" placeholder="0" value="<?php echo isset($_POST['genre_lower']) ? $_POST['genre_lower'] : ''; ?>"> -->
-        <input type="number" step="0.01" id="genre_lower" name="genre_lower" placeholder="0" value="<?php echo isset($_POST['genre_lower']) ? $_POST['genre_lower'] : ''; ?>">
+        <input type="number" step="0.01" id="genre_lower" name="genre_lower" placeholder="0" value="<?php echo isset($_POST['genre_lower']) ? $_POST['genre_lower'] : ''; ?>" min="0" max="5">
         <input type="submit" name="GenreID" value="Submit">
         </h3>
     </form>
