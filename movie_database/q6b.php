@@ -1,7 +1,6 @@
 <?php 
 session_start();
 
-require 'setup_database.php';
 // require 'database.php'; 
 
 
@@ -202,8 +201,9 @@ require 'setup_database.php';
         </select>
         
         <select id="greaterSmaller" name="greaterSmaller" style="width: 100%; max-width: 30px;">
-        <option value="<="><=</option>
         <option value=">=">>=</option>
+        <option value="<="><=</option>
+        
         </select>
         
         <select id="personalityTraitsValue" name="personalityTraitsValue" style="width: 100%; max-width: 20px;">
@@ -212,6 +212,8 @@ require 'setup_database.php';
         <option value="3">3</option>
         <option value="4">4</option>
         <option value="5">5</option>
+        <option value="6">6</option>
+        <option value="7">7</option>
         </select>
 
         <b> and </b>
@@ -274,8 +276,9 @@ require 'setup_database.php';
             $genre = $_POST['genre'];
             $genreRatingCount = $_POST['genre_rating_count'];
             
-                        
+            require 'setup_database.php';              
             $result = getGenresSQL($mysqli, $personalityTrait, $greaterSmaller, $personalityTraitsValue, $genre, $genreRatingCount);
+            $mysqli->close();
     
             while ($row = $result->fetch_assoc()) {
                 $personalityTraitScore[] = $row[$personalityTrait];
@@ -283,8 +286,12 @@ require 'setup_database.php';
                 $ratingCount[] = $row['rating_count'];
             }
     
-            $correlation = weightedPearsonCorrelation($personalityTraitScore, $ratingScore, $ratingCount);
-            echo "<b>Correlation:</b> " . $correlation . "<br>";
+            if (empty($ratingCount) || empty($ratingScore)) {
+                echo "No correlation found";
+            } else {
+                $correlation = weightedPearsonCorrelation($personalityTraitScore, $ratingScore, $ratingCount);
+                echo "<b>Correlation:</b> " . $correlation . "<br>";
+            }
         }
 
     }
@@ -300,33 +307,28 @@ require 'setup_database.php';
 
 function getGenresSQL ($mysqli, $personalityTrait, $greaterSmaller, $personalityTraitsValue, $genre, $genreRatingCount){
     $personalityTrait = "p." . $personalityTrait;
-    $sql = "SELECT 
-        p.rating_userID, 
-        $personalityTrait,
-        AVG(r.rating) AS average_rating,
-        COUNT(r.rating) AS rating_count
-        FROM 
-            ratings r 
-        INNER JOIN 
-            movie_genre mg ON r.movieID = mg.movieID
-        INNER JOIN 
-            genre g ON mg.genreID = g.genreID
-        INNER JOIN 
-            personality p ON r.rating_userID = p.rating_userID
-        WHERE 
-            g.genreName = '$genre' 
-            AND $personalityTrait $greaterSmaller $personalityTraitsValue
-        GROUP BY 
-            r.rating_userID, 
-            $personalityTrait
-        HAVING 
-            COUNT(r.rating) > $genreRatingCount
-        ORDER BY 
-            r.rating_userID, 
-            AVG(r.rating) DESC, 
-            COUNT(r.rating) DESC;";
+    $sql = "SELECT p.rating_userID, $personalityTrait, AVG(r.rating) AS average_rating, COUNT(r.rating) AS rating_count ";
+    $sql .= "FROM ratings r INNER JOIN movie_genre mg ON r.movieID = mg.movieID ";
+    $sql .= "INNER JOIN genre g ON mg.genreID = g.genreID ";
+    $sql .= "INNER JOIN personality p ON r.rating_userID = p.rating_userID ";
+    $sql .= "WHERE g.genreName = ? "; 
+    if ($greaterSmaller == ">=") {
+        $sql .= "AND $personalityTrait >= ? ";
+    } elseif ($greaterSmaller == "<=") {
+        $sql .= "AND $personalityTrait <= ? ";
+    }
+    $sql .= "GROUP BY r.rating_userID, $personalityTrait ";
+    $sql .= "HAVING COUNT(r.rating) > ? ";
+    $sql .= "ORDER BY r.rating_userID, ";
+    $sql .= "AVG(r.rating) DESC, ";
+    $sql .= "COUNT(r.rating) DESC;";
 
-    $result = $mysqli->query($sql);
+
+    $stmt = $mysqli->prepare($sql);
+    $stmt->bind_param("sii", $genre, $personalityTraitsValue, $genreRatingCount);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $stmt->close();
 
     return $result;
 }

@@ -1,7 +1,5 @@
 <?php 
 session_start();
-
-require 'setup_database.php';
 // require 'database.php'; 
 
 
@@ -188,8 +186,8 @@ require 'setup_database.php';
         </select>
         
         <select id="greaterSmaller" name="greaterSmaller" style="width: 100%; max-width: 30px;">
-        <option value="<="><=</option>
         <option value=">=">>=</option>
+        <option value="<="><=</option>
         </select>
         
         <select id="personalityTraitsValue" name="personalityTraitsValue" style="width: 100%; max-width: 20px;">
@@ -198,6 +196,8 @@ require 'setup_database.php';
         <option value="3">3</option>
         <option value="4">4</option>
         <option value="5">5</option>
+        <option value="6">6</option>
+        <option value="7">7</option>
         </select>
 
         <b> and </b>
@@ -228,20 +228,28 @@ require 'setup_database.php';
             $personalityTraitsValue = $_POST['personalityTraitsValue'];
                         
             if ($_POST['rating'] == "high") {
-                $rating = ">= 4";
-            } else {
-                $rating = "<= 2";
+                $rating = 4;
+            } 
+            if ($_POST['rating'] == "low"){
+                $rating = 2;
             }
-                        
+
+            require 'setup_database.php';           
             $result = getRatingSQL($mysqli, $personalityTrait, $greaterSmaller, $personalityTraitsValue, $rating);
+            $mysqli->close();
     
             while ($row = $result->fetch_assoc()) {
                 $personalityTraitScore[] = $row[$personalityTrait];
                 $ratingScore[] = $row['rating'];
             }
-    
-            $correlation = pearsonCorrelation($personalityTraitScore, $ratingScore);
-            echo "<b>Correlation:</b> " . $correlation . "<br>";
+            
+            if (empty($personalityTraitScore) || empty($ratingScore)) {
+                echo "No correlation found";
+            } else {
+                $correlation = pearsonCorrelation($personalityTraitScore, $ratingScore);
+                echo "<b>Correlation:</b> " . $correlation . "<br>";
+            }
+            
         }
 
     }
@@ -257,81 +265,32 @@ require 'setup_database.php';
 
 function getRatingSQL ($mysqli, $personalityTrait, $greaterSmaller, $personalityTraitsValue, $rating){
     $personalityTrait = "p." . $personalityTrait;
-    $sql = "SELECT p.rating_userID, $personalityTrait, AVG(r.rating) as rating
-            FROM personality p
-            JOIN ratings r
-            WHERE p.rating_userID = r.rating_userID
-            AND rating $rating
-            AND $personalityTrait $greaterSmaller $personalityTraitsValue
-            GROUP BY p.rating_userID;";
-            
 
-    $result = $mysqli->query($sql);
+    $sql = "SELECT p.rating_userID, $personalityTrait, AVG(r.rating) as rating " ;
+    $sql .= "FROM personality p ";
+    $sql .= "JOIN ratings r ";
+    $sql .= "WHERE p.rating_userID = r.rating_userID ";
+    if ($rating == 4) {
+        $sql .= "AND rating >= 4 ";
+    } elseif ($rating == 2) {
+        $sql .= "AND rating <= 2 ";
+    }
+    
+    if ($greaterSmaller == ">=") {
+        $sql .= "AND $personalityTrait >= ? ";
+    } elseif ($greaterSmaller == "<=") {
+        $sql .= "AND $personalityTrait <= ? ";
+    }
+    $sql .= "GROUP BY p.rating_userID;";
+
+    $stmt = $mysqli->prepare($sql);
+    $stmt->bind_param("i", $personalityTraitsValue);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $stmt->close();
 
     return $result;
 }
-
-function getGenresSQL ($mysqli){
-    $sql = "WITH UserGenreAverage AS (
-            SELECT
-                rating_userID,
-                genreID,
-                AVG(rating) AS avg_rating
-            FROM
-                ratings r
-            INNER JOIN
-                movie_genre mg ON r.movieID = mg.movieID
-            GROUP BY
-                rating_userID, genreID
-        ), MaxUserGenreAverage AS (
-            SELECT
-                rating_userID,
-                MAX(avg_rating) AS max_average_rating
-            FROM
-                UserGenreAverage
-            GROUP BY
-                rating_userID
-        ), FinalRatings AS (
-            SELECT
-                uga.rating_userID,
-                uga.genreID,
-                uga.avg_rating AS average_rating,
-                COUNT(r.rating) AS rating_count
-            FROM
-                UserGenreAverage uga
-            INNER JOIN
-                ratings r ON uga.rating_userID = r.rating_userID
-            INNER JOIN
-                movie_genre mg ON r.movieID = mg.movieID AND uga.genreID = mg.genreID
-            INNER JOIN
-                MaxUserGenreAverage muga ON uga.rating_userID = muga.rating_userID AND uga.avg_rating = muga.max_average_rating
-            GROUP BY
-                uga.rating_userID, uga.genreID, uga.avg_rating
-        )
-        SELECT
-            p.rating_userID,
-            p.agreeableness,
-            p.emotional_stability,
-            p.conscientiousness,
-            p.extraversion,
-            g.genreName,
-            fr.average_rating,
-            fr.rating_count
-        FROM
-            FinalRatings fr
-        INNER JOIN
-            personality p ON fr.rating_userID = p.rating_userID
-        INNER JOIN
-            genre g ON fr.genreID = g.genreID
-        ORDER BY
-            fr.rating_userID, fr.average_rating DESC, fr.rating_count DESC;";
-            
-
-    $result = $mysqli->query($sql);
-
-    return $result;
-} 
-
 
 function pearsonCorrelation($xs, $ys) {
     $n = count($xs);
