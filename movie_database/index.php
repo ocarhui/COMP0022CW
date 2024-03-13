@@ -122,6 +122,76 @@ $mysqli->close();
         button[type="button"]:hover {
             background-color: #0056b3;
         }
+
+        .checkbox-container {
+            display: inline-block;
+            position: relative;
+            padding-left: 35px;
+            margin-right: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            user-select: none;
+            -webkit-user-select: none; /* Safari */
+            -moz-user-select: none; /* Firefox */
+            -ms-user-select: none; /* IE10+/Edge */
+        }
+
+        .checkbox-container input {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            height: 0;
+            width: 0;
+        }
+
+        .checkmark {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 30px;
+            width: 28px;
+            background-color: #eee;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            transition: background-color 0.3s ease;
+        }
+
+        .checkbox-container:hover input ~ .checkmark {
+            background-color: #ccc;
+        }
+
+        .checkbox-container input:checked ~ .checkmark {
+            background-color: #2196F3;
+        }
+
+        .checkmark:after {
+            content: "";
+            position: absolute;
+            display: none;
+        }
+
+        .checkbox-container input:checked ~ .checkmark:after {
+            display: block;
+        }
+
+        .checkbox-container .checkmark:after {
+            left: 9px;
+            top: 5px;
+            width: 7px;
+            height: 15px;
+            border: solid white;
+            border-width: 0 3px 3px 0;
+            transform: rotate(45deg);
+        }
+
+        /* Label hover effect */
+        .checkbox-container label {
+            transition: color 0.3s ease;
+        }
+
+        .checkbox-container:hover label {
+            color: #2196F3;
+        }
     </style>
 </head>
 <body>
