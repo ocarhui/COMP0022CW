@@ -95,21 +95,6 @@ session_start();
         <a href="q6a.php">Personality Traits & Rating Correlation</a>
         <a href="q6b.php">Personality Traits & Genres Correlation</a>
     </div>
-    <div class="user-account">
-        <?php if (isset($_SESSION['username'])) : ?>
-            <span>Welcome, <?php echo $_SESSION['username']; ?></span>
-            <form method="post" action="logout.php">
-                <input type="submit" value="Log out">
-            </form>
-        <?php else : ?>
-            <form method="post" action="login.php">
-                <input type="submit" value="Login">
-            </form>
-            <form method="post" action="register.php">
-                <input type="submit" value="Register">
-            </form>
-        <?php endif; ?>
-    </div>
 </div>
 
 <div class="search-container">

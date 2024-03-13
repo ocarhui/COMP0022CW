@@ -36,5 +36,10 @@ $error = isset($_GET['error']) ? $_GET['error'] : '';
             <input type="submit" name="submit" value="Register">
         </form>
     </div>
+    
+    <br>
+    <br>
+    <a href="index.php">back</a>
+
 </body>
 </html>

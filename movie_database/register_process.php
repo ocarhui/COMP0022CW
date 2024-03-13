@@ -1,5 +1,5 @@
 <?php
-require 'database.php';
+require 'setup_database.php';
 
 if (isset($_POST['submit'])) {
     $username = $_POST['username'];
@@ -30,7 +30,7 @@ if (isset($_POST['submit'])) {
     else {
         // Check if username or email already exists
         $query = "SELECT * FROM users WHERE username = ? OR email = ?";
-        $stmt = mysqli_prepare($connection, $query);
+        $stmt = mysqli_prepare($mysqli, $query);
         mysqli_stmt_bind_param($stmt, "ss", $username, $email);
         mysqli_stmt_execute($stmt);
         mysqli_stmt_store_result($stmt);
@@ -42,12 +42,12 @@ if (isset($_POST['submit'])) {
         } else {
             // Use prepared statement to insert user data
             $insert_query = "INSERT INTO users (username, email, password) VALUES (?, ?, ?)";
-            $insert_stmt = mysqli_prepare($connection, $insert_query);
+            $insert_stmt = mysqli_prepare($mysqli, $insert_query);
             mysqli_stmt_bind_param($insert_stmt, "sss", $username, $email, $hashed_password);
 
             // Execute the prepared statement
             if (!mysqli_stmt_execute($insert_stmt)) {
-                error_log('Database Error: ' . mysqli_error($connection));
+                error_log('Database Error: ' . mysqli_error($mysqli));
                 die('Oops! Something went wrong. Please try again later.');
             } else {
                 echo '<script>alert("Account created successfully!"); window.location.href = "login.php";</script>';
@@ -57,5 +57,5 @@ if (isset($_POST['submit'])) {
     }
 }
 
-mysqli_close($connection);
+mysqli_close($mysqli);
 ?>
