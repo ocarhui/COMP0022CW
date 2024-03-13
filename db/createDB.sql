@@ -121,6 +121,30 @@ CREATE TABLE `movie_database`.`movie_tags` (
     FOREIGN KEY (`tagID`) REFERENCES `tags`(`tagID`)
  ) ENGINE = InnoDB;
 
+CREATE TABLE `movie_database`.`personality` (
+    `rating_userID` VARCHAR(32) NOT NULL,
+    `agreeableness` FLOAT(3,2) NOT NULL,
+    `emotional_stability` FLOAT(3,2) NOT NULL,
+    `conscientiousness` FLOAT(3,2) NOT NULL,
+    `extraversion` FLOAT(3,2) NOT NULL,
+    `assigned_metric` VARCHAR(50) NOT NULL,
+    `assigned_condition` VARCHAR(50) NOT NULL, 
+    `is_personalised` INT NOT NULL,
+    `enjoy_watching` INT NOT NULL,
+    PRIMARY KEY (`rating_userID`),
+    FOREIGN KEY (`rating_userID`) REFERENCES `rating_users`(`rating_userID`)
+) ENGINE = InnoDB;
+
+CREATE TABLE `movie_database`.`personality_movie_prediction` (
+    `rating_userID` VARCHAR(32) NOT NULL,
+    `movie_order` INT NOT NULL,
+    `movieID` INT NOT NULL,
+    `predicted_rating` FLOAT(13,2) NOT NULL,
+    PRIMARY KEY (`rating_userID`, `movie_order`),
+    FOREIGN KEY (`rating_userID`) REFERENCES `rating_users`(`rating_userID`),
+    FOREIGN KEY (`movieID`) REFERENCES `movies`(`movieID`)
+) ENGINE = InnoDB;
+
 INSERT INTO `movie_database`.`users` (`username`, `email`, `password`) VALUES ('a', '1463855272@qq.com', '$2y$10$z7nXkEABKtjHbjvFG3TDo.qj7M9jw0CzWRuHC8xyvztg1FbYnblXC');
 
 CREATE USER 'movieadmin' IDENTIFIED BY 'secretpassword';

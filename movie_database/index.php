@@ -136,6 +136,8 @@ $mysqli->close();
         <a href="q3.php">Q3</a>
         <a href="q4.php">Q4</a>
         <a href="q5.php">Q5</a>
+        <a href="q6a.php">Personality Traits & Rating Correlation</a>
+        <a href="q6b.php">Personality Traits & Genres Correlation</a>
     </div>
     <div class="user-account">
         <?php if (isset($_SESSION['username'])) : ?>
@@ -246,7 +248,6 @@ $mysqli->close();
     // Your PHP script for fetching and displaying filter results
     if ($select_part === 'null' || empty($selected_columns)) {
         echo "<h3>Please select film information to display</h3>";
-        echo "<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>";
     } elseif ($result && $result->num_rows > 0) {
         // Start the table and optionally add a border for visibility
         echo "<p>" . mysqli_num_rows($result) . " Results</p>" ;
