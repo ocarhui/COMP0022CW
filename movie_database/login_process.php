@@ -1,5 +1,5 @@
 <?php
-require 'database.php';
+require 'setup_database.php';
 
 if (isset($_POST['submit'])) {
     $username = $_POST['username'];
@@ -7,7 +7,7 @@ if (isset($_POST['submit'])) {
 
     // Check if username exists
     $query = "SELECT * FROM users WHERE username = ?";
-    $stmt = mysqli_prepare($connection, $query);
+    $stmt = mysqli_prepare($mysqli, $query);
     mysqli_stmt_bind_param($stmt, "s", $username);
     mysqli_stmt_execute($stmt);
     mysqli_stmt_store_result($stmt);
@@ -15,7 +15,7 @@ if (isset($_POST['submit'])) {
     if (mysqli_stmt_num_rows($stmt) == 1) {
         // Username exists, now verify password
         $query = "SELECT password FROM users WHERE username = ?";
-        $stmt = mysqli_prepare($connection, $query);
+        $stmt = mysqli_prepare($mysqli, $query);
         mysqli_stmt_bind_param($stmt, "s", $username);
         mysqli_stmt_execute($stmt);
         mysqli_stmt_store_result($stmt);
@@ -44,5 +44,5 @@ if (isset($_POST['submit'])) {
     }
 }
 
-mysqli_close($connection);
+mysqli_close($mysqli);
 ?>

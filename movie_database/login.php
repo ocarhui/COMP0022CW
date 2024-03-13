@@ -48,6 +48,10 @@ $error = isset($_GET['error']) ? $_GET['error'] : '';
             <input type="submit" name="submit" value="Login">
         </form>
     </div>
+    
+    <br>
+    <br>
+    <a href="index.php">back</a>
 
     <div class="bottom-sentence">
     Made with LOVE by <a href="mailto:junzhang.li.21@ucl.ac.uk"><span style="font-weight: bold;">Group 8</span></a>
